@@ -1,0 +1,213 @@
+[
+    {
+      "name": "honey flower full leak",
+      "wave": 2,
+      "merc": 0,
+      "export": {"Towers":[{"T":"honeyflower_unit_id","X":-3.0,"Z":-1.5,"S":0.0}],"Rolls":["peewee_unit_id","infiltrator_unit_id","eternal_wanderer_unit_id","honeyflower_unit_id","nightmare_unit_id","berserker_unit_id"],"LegionSpell":"","Gold":9874,"Mythium":10006,"Wave":2},
+      "expected_leak": 100.0
+    },
+    {
+        "name": "honey flower full hold",
+        "wave": 2,
+        "merc": 0,
+        "export": {"Towers":[{"T":"honeyflower_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"buzz_unit_id","X":-1.0,"Z":-2.0,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","honeyflower_unit_id","cursed_casket_unit_id","gatling_gun_unit_id","soul_gate_unit_id"],"LegionSpell":"","Gold":9954,"Mythium":10424,"Wave":2},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "honey flower + snail",
+        "wave": 2,
+        "merc": 4,
+        "export": {"Towers":[{"T":"honeyflower_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"buzz_unit_id","X":-1.0,"Z":-2.0,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","honeyflower_unit_id","cursed_casket_unit_id","gatling_gun_unit_id","soul_gate_unit_id"],"LegionSpell":"","Gold":9954,"Mythium":10424,"Wave":2},
+        "expected_leak": 87.5
+    },
+    {
+        "name": "nightmare butcher",
+        "wave": 5,
+        "merc": 0,
+        "export": {"Towers":[{"T":"butcher_unit_id","X":-3.0,"Z":0.0,"S":0.0},{"T":"nightmare_unit_id","X":-4.0,"Z":-0.5,"S":0.0}],"Rolls":["seedling_unit_id","bone_warrior_unit_id","warg_unit_id","butcher_unit_id","aps_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":10989,"Mythium":9984,"Wave":5},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "nightmare butcher bad position",
+        "wave": 5,
+        "merc": 0,
+        "export": {"Towers":[{"T":"butcher_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"nightmare_unit_id","X":-4.0,"Z":-0.5,"S":0.0}],"Rolls":["seedling_unit_id","bone_warrior_unit_id","warg_unit_id","butcher_unit_id","aps_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":10989,"Mythium":9996,"Wave":5},
+        "expected_leak": 66.67
+    },
+    {
+        "name": "yazora bad split",
+        "wave": 5,
+        "merc": 0,
+        "export": {"Towers":[{"T":"butcher_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"nightmare_unit_id","X":-4.0,"Z":-0.5,"S":0.0}],"Rolls":["seedling_unit_id","bone_warrior_unit_id","warg_unit_id","butcher_unit_id","aps_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":10989,"Mythium":9996,"Wave":5},
+        "expected_leak": 50.0
+    },
+    {
+        "name": "yazora good split",
+        "wave": 5,
+        "merc": 0,
+        "export": {"Towers":[{"T":"desert_pilgrim_unit_id","X":4.0,"Z":0.5,"S":0.0},{"T":"yozora_unit_id","X":-3.0,"Z":0.5,"S":0.0}],"Rolls":["seedling_unit_id","gargoyle_unit_id","desert_pilgrim_unit_id","yozora_unit_id","great_boar_unit_id","holy_avenger_unit_id"],"LegionSpell":"","Gold":10716,"Mythium":10019,"Wave":5},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "priestess leak",
+        "wave": 6,
+        "merc": 0,
+        "export": {"Towers":[{"T":"peewee_unit_id","X":-2.0,"Z":-6.0,"S":0.0},{"T":"peewee_unit_id","X":3.0,"Z":0.0,"S":0.0},{"T":"peewee_unit_id","X":4.0,"Z":0.5,"S":0.0},{"T":"windhawk_unit_id","X":3.0,"Z":1.0,"S":0.0},{"T":"windhawk_unit_id","X":4.0,"Z":1.5,"S":0.0},{"T":"priestess_of_the_abyss_unit_id","X":-4.0,"Z":1.5,"S":0.0}],"Rolls":["peewee_unit_id","windhawk_unit_id","eternal_wanderer_unit_id","priestess_of_the_abyss_unit_id","yozora_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13929,"Mythium":10580,"Wave":6},
+        "expected_leak": 66.67
+    },
+    {
+        "name": "priestess hold",
+        "wave": 6,
+        "merc": 0,
+        "export": {"Towers":[{"T":"peewee_unit_id","X":-2.0,"Z":-4.5,"S":0.0},{"T":"peewee_unit_id","X":3.0,"Z":0.0,"S":0.0},{"T":"peewee_unit_id","X":4.0,"Z":0.5,"S":0.0},{"T":"windhawk_unit_id","X":3.0,"Z":1.0,"S":0.0},{"T":"windhawk_unit_id","X":4.0,"Z":1.5,"S":0.0},{"T":"priestess_of_the_abyss_unit_id","X":-4.0,"Z":1.5,"S":0.0}],"Rolls":["peewee_unit_id","windhawk_unit_id","eternal_wanderer_unit_id","priestess_of_the_abyss_unit_id","yozora_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13929,"Mythium":10588,"Wave":6},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "priestess ranged leak",
+        "wave": 11,
+        "merc": 0,
+        "export": {"Towers":[{"T":"azeria_unit_id","X":-4.0,"Z":5.5,"S":0.0},{"T":"banana_bunk_unit_id","X":3.0,"Z":1.0,"S":0.0},{"T":"banana_bunk_unit_id","X":4.0,"Z":1.5,"S":0.0}],"Rolls":["peewee_unit_id","windhawk_unit_id","eternal_wanderer_unit_id","priestess_of_the_abyss_unit_id","yozora_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13878,"Mythium":10642,"Wave":11},
+        "expected_leak": 58.0
+    },
+    {
+        "name": "priestess ranged hold",
+        "wave": 11,
+        "merc": 0,
+        "export": {"Towers":[{"T":"azeria_unit_id","X":-4.0,"Z":2.5,"S":0.0},{"T":"banana_bunk_unit_id","X":3.0,"Z":1.0,"S":0.0},{"T":"banana_bunk_unit_id","X":4.0,"Z":1.5,"S":0.0}],"Rolls":["peewee_unit_id","windhawk_unit_id","eternal_wanderer_unit_id","priestess_of_the_abyss_unit_id","yozora_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13878,"Mythium":10649,"Wave":11},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "pack rat",
+        "wave": 2,
+        "merc": 0,
+        "export": {"Towers":[{"T":"looter_unit_id","X":4.0,"Z":-2.5,"S":0.0},{"T":"pack_rat_unit_id","X":-1.0,"Z":-3.5,"S":0.0},{"T":"windhawk_unit_id","X":-3.0,"Z":-2.5,"S":0.0}],"Rolls":["looter_unit_id","gargoyle_unit_id","windhawk_unit_id","tempest_unit_id","butcher_unit_id","fire_lord_unit_id"],"LegionSpell":"","Gold":186,"Mythium":12,"Wave":2},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "pack rat hunt",
+        "wave": 2,
+        "merc": 0,
+        "export": {"Towers":[{"T":"looter_unit_id","X":4.0,"Z":-2.5,"S":0.0},{"T":"pack_rat_nest_unit_id","X":-1.0,"Z":-3.5,"S":0.0},{"T":"windhawk_unit_id","X":-3.0,"Z":-2.5,"S":0.0}],"Rolls":["looter_unit_id","gargoyle_unit_id","windhawk_unit_id","tempest_unit_id","butcher_unit_id","fire_lord_unit_id"],"LegionSpell":"","Gold":330,"Mythium":34,"Wave":2},
+        "expected_leak": 66.67
+    },
+    {
+        "name": "kingpin full",
+        "wave": 10,
+        "merc": 0,
+        "export": {"Towers":[{"T":"sacred_steed_unit_id","X":-2.0,"Z":0.5,"S":0.0},{"T":"antler_unit_id","X":-3.0,"Z":1.0,"S":0.0},{"T":"kingpin_unit_id","X":-4.0,"Z":0.5,"S":225.0}],"Rolls":["proton_unit_id","angler_unit_id","bazooka_unit_id","sacred_steed_unit_id","elite_archer_unit_id","antler_unit_id"],"LegionSpell":"","Gold":1484,"Mythium":154,"Wave":10},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "kingpin empty",
+        "wave": 10,
+        "merc": 0,
+        "export": {"Towers":[{"T":"kingpin_unit_id","X":-4.0,"Z":0.5,"S":0.0},{"T":"sacred_steed_unit_id","X":-2.0,"Z":0.5,"S":0.0},{"T":"antler_unit_id","X":-3.0,"Z":1.0,"S":0.0}],"Rolls":["proton_unit_id","angler_unit_id","bazooka_unit_id","sacred_steed_unit_id","elite_archer_unit_id","antler_unit_id"],"LegionSpell":"","Gold":1914,"Mythium":168,"Wave":10},
+        "expected_leak": 100
+    },
+    {
+        "name": "auras good",
+        "wave": 16,
+        "merc": 0,
+        "export": {"Towers":[{"T":"deathcap_unit_id","X":4.0,"Z":-1.0,"S":0.0},{"T":"butcher_unit_id","X":-4.0,"Z":-0.5,"S":0.0},{"T":"whitemane_unit_id","X":3.0,"Z":-0.5,"S":0.0},{"T":"antler_unit_id","X":4.0,"Z":0.0,"S":0.0},{"T":"antler_unit_id","X":3.0,"Z":0.5,"S":0.0},{"T":"mps_unit_id","X":-3.0,"Z":1.0,"S":0.0},{"T":"head_chef_unit_id","X":-3.0,"Z":0.0,"S":0.0},{"T":"doppelganger_unit_id","X":-4.0,"Z":0.5,"S":0.0}],"Rolls":["buzz_unit_id","ranger_unit_id","wileshroom_unit_id","honeyflower_unit_id","antler_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":11221,"Mythium":10306,"Wave":16},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "auras bad",
+        "wave": 16,
+        "merc": 0,
+        "export": {"Towers":[{"T":"mps_unit_id","X":-2.5,"Z":1.0,"S":0.0},{"T":"butcher_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"head_chef_unit_id","X":-2.5,"Z":0.0,"S":0.0},{"T":"whitemane_unit_id","X":2.5,"Z":-1.0,"S":0.0},{"T":"deathcap_unit_id","X":4.0,"Z":-1.0,"S":0.0},{"T":"antler_unit_id","X":4.0,"Z":0.0,"S":0.0},{"T":"antler_unit_id","X":3.0,"Z":0.5,"S":0.0},{"T":"doppelganger_unit_id","X":-4.0,"Z":0.5,"S":0.0}],"Rolls":["peewee_unit_id","bazooka_unit_id","tempest_unit_id","aps_unit_id","berserker_unit_id","millennium_unit_id"],"LegionSpell":"","Gold":11549,"Mythium":10335,"Wave":16},
+        "expected_leak": 78.0
+    },
+    {
+        "name": "AOE apart",
+        "wave": 12,
+        "merc": 0,
+        "export": {"Towers":[{"T":"deathcap_unit_id","X":3.0,"Z":-1.5,"S":0.0},{"T":"deathcap_unit_id","X":3.0,"Z":-0.5,"S":0.0},{"T":"deathcap_unit_id","X":-3.0,"Z":-1.5,"S":0.0},{"T":"deathcap_unit_id","X":-3.0,"Z":-0.5,"S":0.0}],"Rolls":["buzz_unit_id","ranger_unit_id","wileshroom_unit_id","honeyflower_unit_id","antler_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13209,"Mythium":10358,"Wave":12},
+        "expected_leak": 100.0
+    },
+    {
+        "name": "AOE together",
+        "wave": 12,
+        "merc": 0,
+        "export": {"Towers":[{"T":"deathcap_unit_id","X":-2.0,"Z":-2.0,"S":0.0},{"T":"deathcap_unit_id","X":-2.0,"Z":-1.0,"S":0.0},{"T":"deathcap_unit_id","X":-3.0,"Z":-0.5,"S":0.0},{"T":"deathcap_unit_id","X":-3.0,"Z":-1.5,"S":0.0}],"Rolls":["buzz_unit_id","ranger_unit_id","wileshroom_unit_id","honeyflower_unit_id","antler_unit_id","banana_bunk_unit_id"],"LegionSpell":"","Gold":13209,"Mythium":10358,"Wave":12},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "wave centering",
+        "wave": 15,
+        "merc": 0,
+        "export": {"Towers":[{"T":"mudman_unit_id","X":-1.0,"Z":3.5,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-3.5,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-2.5,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"mudman_unit_id","X":-2.0,"Z":-0.5,"S":0.0},{"T":"mudman_unit_id","X":-3.0,"Z":0.0,"S":0.0},{"T":"mudman_unit_id","X":-4.0,"Z":0.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-3.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-2.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-2.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-1.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-0.5,"S":0.0}],"Rolls":["seedling_unit_id","bazooka_unit_id","aqua_spirit_unit_id","wileshroom_unit_id","mudman_unit_id","berserker_unit_id"],"LegionSpell":"","Gold":7795,"Mythium":10030,"Wave":15},
+        "expected_leak": 33.33
+    },
+    {
+        "name": "no wave centering",
+        "wave": 15,
+        "merc": 0,
+        "export": {"Towers":[{"T":"mudman_unit_id","X":4.0,"Z":0.0,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-3.5,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-2.5,"S":0.0},{"T":"pyro_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"mudman_unit_id","X":-2.0,"Z":-0.5,"S":0.0},{"T":"mudman_unit_id","X":-3.0,"Z":0.0,"S":0.0},{"T":"mudman_unit_id","X":-4.0,"Z":0.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-3.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-2.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-2.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-1.5,"S":0.0},{"T":"pyro_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"pyro_unit_id","X":-4.0,"Z":-0.5,"S":0.0}],"Rolls":["seedling_unit_id","bazooka_unit_id","aqua_spirit_unit_id","wileshroom_unit_id","mudman_unit_id","berserker_unit_id"],"LegionSpell":"","Gold":8290,"Mythium":10102,"Wave":15},
+        "expected_leak": 66.67
+    },
+    {
+        "name": "golems, no harden",
+        "wave": 15,
+        "merc": 0,
+        "export": {"Towers":[{"T":"aqua_spirit_unit_id","X":-1.0,"Z":-2.0,"S":0.0},{"T":"rogue_wave_unit_id","X":-3.0,"Z":-2.0,"S":0.0},{"T":"fire_elemental_unit_id","X":-3.0,"Z":-1.0,"S":0.0},{"T":"zeus_unit_id","X":-2.0,"Z":-2.5,"S":0.0},{"T":"zeus_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"golem_unit_id","X":-1.0,"Z":-1.0,"S":0.0},{"T":"rogue_wave_unit_id","X":-3.0,"Z":-3.0,"S":0.0},{"T":"rogue_wave_unit_id","X":-4.0,"Z":-2.5,"S":0.0},{"T":"fire_elemental_unit_id","X":-4.0,"Z":-1.5,"S":0.0},{"T":"fire_elemental_unit_id","X":-4.0,"Z":-0.5,"S":0.0},{"T":"golem_unit_id","X":-2.0,"Z":-0.5,"S":0.0},{"T":"golem_unit_id","X":-3.0,"Z":0.0,"S":0.0},{"T":"golem_unit_id","X":-4.0,"Z":0.5,"S":0.0}],"Rolls":["seedling_unit_id","bazooka_unit_id","aqua_spirit_unit_id","wileshroom_unit_id","mudman_unit_id","berserker_unit_id"],"LegionSpell":"","Gold":9596,"Mythium":10300,"Wave":15},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "orchids",
+        "wave": 15,
+        "merc": 0,
+        "export": {"Towers":[{"T":"infiltrator_unit_id","X":2.0,"Z":-0.5,"S":0.0},{"T":"infiltrator_unit_id","X":-2.0,"Z":-0.5,"S":0.0},{"T":"orchid_unit_id","X":1.0,"Z":-1.0,"S":0.0},{"T":"orchid_unit_id","X":0.0,"Z":-1.5,"S":0.0},{"T":"orchid_unit_id","X":-1.0,"Z":-1.0,"S":0.0},{"T":"orchid_unit_id","X":0.0,"Z":-0.5,"S":0.0},{"T":"orchid_unit_id","X":1.0,"Z":0.0,"S":0.0},{"T":"orchid_unit_id","X":-1.0,"Z":0.0,"S":0.0},{"T":"orchid_unit_id","X":2.0,"Z":0.5,"S":0.0},{"T":"orchid_unit_id","X":-2.0,"Z":0.5,"S":0.0},{"T":"iron_maiden_unit_id","X":0.0,"Z":1.5,"S":0.0}],"Rolls":["proton_unit_id","golden_buckler_unit_id","infiltrator_unit_id","cursed_casket_unit_id","radiant_halo_unit_id","great_boar_unit_id"],"LegionSpell":"","Gold":10371,"Mythium":10354,"Wave":15},
+        "expected_leak": 33.33
+    },
+    {
+        "name": "stacked orchids",
+        "wave": 15,
+        "merc": 0,
+        "export": {"Towers":[{"T":"infiltrator_unit_id","X":2.0,"Z":-0.5,"S":4.0},{"T":"infiltrator_unit_id","X":-2.0,"Z":-0.5,"S":4.0},{"T":"orchid_unit_id","X":1.0,"Z":-1.0,"S":12.0},{"T":"orchid_unit_id","X":0.0,"Z":-1.5,"S":12.0},{"T":"orchid_unit_id","X":-1.0,"Z":-1.0,"S":12.0},{"T":"orchid_unit_id","X":0.0,"Z":-0.5,"S":12.0},{"T":"orchid_unit_id","X":1.0,"Z":0.0,"S":12.0},{"T":"orchid_unit_id","X":-1.0,"Z":0.0,"S":12.0},{"T":"orchid_unit_id","X":2.0,"Z":0.5,"S":12.0},{"T":"orchid_unit_id","X":-2.0,"Z":0.5,"S":12.0},{"T":"iron_maiden_unit_id","X":0.0,"Z":1.5,"S":0.0}],"Rolls":["proton_unit_id","golden_buckler_unit_id","infiltrator_unit_id","cursed_casket_unit_id","radiant_halo_unit_id","great_boar_unit_id"],"LegionSpell":"","Gold":10203,"Mythium":10358,"Wave":15},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "boars half",
+        "wave": 14,
+        "merc": 0,
+        "export": {"Towers":[{"T":"royal_guard_unit_id","X":1.0,"Z":-6.5,"S":0.0},{"T":"red_eyes_unit_id","X":2.0,"Z":-6.5,"S":0.0},{"T":"red_eyes_unit_id","X":3.0,"Z":-6.5,"S":0.0},{"T":"red_eyes_unit_id","X":4.0,"Z":-6.5,"S":0.0}],"Rolls":["proton_unit_id","golden_buckler_unit_id","infiltrator_unit_id","cursed_casket_unit_id","radiant_halo_unit_id","great_boar_unit_id"],"LegionSpell":"","Gold":12778,"Mythium":10543,"Wave":14},
+        "expected_leak": 16.67
+    },
+    {
+        "name": "boars full charge",
+        "wave": 14,
+        "merc": 0,
+        "export": {"Towers":[{"T":"royal_guard_unit_id","X":-4.0,"Z":6.5,"S":0.0},{"T":"red_eyes_unit_id","X":2.0,"Z":-6.5,"S":0.0},{"T":"red_eyes_unit_id","X":3.0,"Z":-6.5,"S":0.0},{"T":"red_eyes_unit_id","X":4.0,"Z":-6.5,"S":0.0}],"Rolls":["proton_unit_id","golden_buckler_unit_id","infiltrator_unit_id","cursed_casket_unit_id","radiant_halo_unit_id","great_boar_unit_id"],"LegionSpell":"","Gold":12778,"Mythium":10546,"Wave":14},
+        "expected_leak": 0
+    },
+    {
+        "name": "gun bad placement",
+        "wave": 8,
+        "merc": 0,
+        "export": {"Towers":[{"T":"sand_badger_unit_id","X":-4.0,"Z":5.5,"S":0.0},{"T":"vulcan_cannon_unit_id","X":-4.0,"Z":-4.5,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","infiltrator_unit_id","warg_unit_id","gatling_gun_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":14400,"Mythium":10585,"Wave":8},
+        "expected_leak": 33.33
+    },
+    {
+        "name": "gun better placement",
+        "wave": 8,
+        "merc": 0,
+        "export": {"Towers":[{"T":"vulcan_cannon_unit_id","X":-4.0,"Z":3.5,"S":0.0},{"T":"sand_badger_unit_id","X":-4.0,"Z":5.5,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","infiltrator_unit_id","warg_unit_id","gatling_gun_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":14628,"Mythium":10605,"Wave":8},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "alphas",
+        "wave": 12,
+        "merc": 0,
+        "export": {"Towers":[{"T":"alpha_male_unit_id","X":-4.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":4.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":2.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":-2.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":0.0,"Z":-1.5,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","infiltrator_unit_id","warg_unit_id","gatling_gun_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":14332,"Mythium":10665,"Wave":12},
+        "expected_leak": 0.0
+    },
+    {
+        "name": "bad alphas",
+        "wave": 12,
+        "merc": 0,
+        "export": {"Towers":[{"T":"alpha_male_unit_id","X":0.5,"Z":-2.5,"S":0.0},{"T":"alpha_male_unit_id","X":-0.5,"Z":-2.5,"S":0.0},{"T":"alpha_male_unit_id","X":1.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":-1.0,"Z":-1.5,"S":0.0},{"T":"alpha_male_unit_id","X":0.0,"Z":-1.5,"S":0.0}],"Rolls":["bone_warrior_unit_id","gargoyle_unit_id","infiltrator_unit_id","warg_unit_id","gatling_gun_unit_id","sand_badger_unit_id"],"LegionSpell":"","Gold":14452,"Mythium":10686,"Wave":12},
+        "expected_leak": 66.67
+    }
+]
+  
