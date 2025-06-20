@@ -25,6 +25,7 @@ db = client["legiontd2"]
 games_collection      = db["games"]
 aggregate_collection  = db["waveBuildAggregation"]
 units_collection      = db["units"]
+waves_collection      = db["waves"]
 
 # ─────────────────────────────── tunables ─────────────────────────────────────
 BATCH_SIZE  = 2_000
@@ -85,14 +86,24 @@ def load_units_data():
         name = doc.get("name")
         if name:
             units[name] = {
-                "totalValue": int(float(doc.get("totalValue", 0) or 0)),
                 "bounty": float(doc.get("goldBounty", 0) or 0),
             }
     return units
 
+def load_waves_data():
+    waves = {}
+    for doc in waves_collection.find({}):
+        lvl = int(doc.get("levelNum"))
+        waves[lvl] = int(doc.get("totalReward", 0))
+    return waves
+
 
 def sum_merc_bounty(lst, units):
-    return sum(units[m]["bounty"] for m in lst if m in units)
+    return sum(
+        (units[m]["bounty"] * 2 if m == "Imp" else units[m]["bounty"])
+        for m in lst
+        if m in units
+    )
 
 
 def calc_leak_value(lst, units):
@@ -114,7 +125,7 @@ def build_key(wave: int, merc: float, build):
 # ───────────────────────────── per‑chunk worker (unchanged) ───────────────────
 
 def process_games_chunk(args):
-    games_chunk, units = args
+    games_chunk, units, waves = args
     local = {}
     for g in games_chunk:
         for p in g.get("playersData", []):
@@ -126,12 +137,12 @@ def process_games_chunk(args):
                 wave = idx + 1
                 if wave == end_wave or wave > 20:
                     continue
-                mercs = mpw[idx] if idx < len(mpw) else []
-                merc_bounty = sum_merc_bounty(mercs, units)
+                merc_bounty = sum_merc_bounty(mpw[idx], units)
                 if merc_bounty > 500:
                     continue
-                leaks = lpw[idx] if idx < len(lpw) else []
-                leak_gold = calc_leak_value(leaks, units) if leaks else 0
+                leak_gold = calc_leak_value(lpw[idx], units)
+                if leak_gold-merc_bounty > waves[idx+1]:
+                    continue
                 k = build_key(wave, merc_bounty, build)
                 if k not in local:
                     local[k] = [0, 0]
@@ -158,6 +169,7 @@ def bulk_upsert_partial(local):
 
 def aggregate_wave_builds_daily(start_iso, end_iso):
     units = load_units_data()
+    waves = load_waves_data()
     for day_s, day_e in each_day(start_iso, end_iso):
         if DATE_IS_STRING:
             start_val, end_val = to_iso_z(day_s), to_iso_z(day_e)
@@ -170,13 +182,13 @@ def aggregate_wave_builds_daily(start_iso, end_iso):
             continue
         cur = games_collection.find(qry, PROJECTION).batch_size(CHUNK_SIZE)
         with ProcessPoolExecutor(max_workers=THREADS) as ex:
-            for local in ex.map(process_games_chunk, ((chunk, units) for chunk in chunked_cursor(cur)), chunksize=1):
+            for local in ex.map(process_games_chunk, ((chunk, units, waves) for chunk in chunked_cursor(cur)), chunksize=1):
                 bulk_upsert_partial(local)
         print("   done", flush=True)
 
 # ───────────────────────────── CLI ────────────────────────────────────────────
 
 if __name__ == "__main__":
-    start, end = (sys.argv[1:3] if len(sys.argv) == 3 else ("2025-03-15T00:00:00Z", "2025-04-15T00:00:00Z"))
+    start, end = (sys.argv[1:3] if len(sys.argv) == 3 else ("2025-04-26T00:00:00Z", "2025-05-13T00:00:00Z"))
     aggregate_wave_builds_daily(start, end)
     print("Aggregation complete.")

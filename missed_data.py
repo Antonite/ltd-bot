@@ -22,3 +22,7 @@ EXTRA_FIGHTERS: list[str] = [
     "hell_raiser_buffed_unit_id",
     "pack_rat_nest_unit_id",
 ]
+
+# TODO
+# connect to mongo db "units" collection and update:
+# froggo_unit_id to have 0 'goldBounty' value
