@@ -185,7 +185,7 @@ class OnTheFlyWeighted(torch.utils.data.IterableDataset):
     Every row is kept with probability weight / max_weight, where
         weight = pos_w if target > 0  else neg_w
     """
-    def __init__(self, base_ds, *, pos_w=1.0, neg_w=5.0,
+    def __init__(self, base_ds, *, pos_w, neg_w,
                  num_samples=None, seed=0):
         super().__init__()
         self.base_ds     = base_ds
@@ -213,8 +213,8 @@ def get_loader(epoch_seed: int):
     base = WaveDataset(SHARDS, epoch_seed)
     ds   = OnTheFlyWeighted(
         base,
-        pos_w=1.0,
-        neg_w=5.0,
+        pos_w=4.0,
+        neg_w=1.0,
         num_samples=BATCH * STEPS_PER_EPOCH,
         seed=epoch_seed,
     )
@@ -258,6 +258,7 @@ class WaveModel(nn.Module):
             nn.GELU(),
             nn.Dropout(0.1),
             nn.Linear(256, 1),
+            nn.Sigmoid(),          # output ∈ [0, 1]
         )
 
     def forward(self, board, wave_id, merc_feat):
@@ -309,7 +310,7 @@ def train():
     load_ckpt(model, opt)           # weights & states, but fresh step/epoch
 
     writer        = SummaryWriter(LOG_DIR)
-    loss_fn       = nn.BCEWithLogitsLoss()
+    loss_fn       = nn.SmoothL1Loss(beta=0.02)
 
     step          = 0
     running_loss  = 0.0

@@ -23,8 +23,7 @@ def _predict(model, device: str, case: dict) -> float:
     """Return predicted leak % for one test case."""
     board = build_to_tensor(case["export"]).unsqueeze(0).to(device)
 
-    wave_id = torch.tensor([[case["wave"] - 1]],
-                           dtype=torch.long, device=device)
+    wave_id = torch.tensor([[case["wave"] - 1]], dtype=torch.long, device=device)
 
     merc_val  = min(case["merc"], MERC_CLIP)
     merc_feat = torch.tensor(
@@ -33,10 +32,9 @@ def _predict(model, device: str, case: dict) -> float:
     )
 
     with torch.no_grad():
-        # logits ➜ probability, then scale to %
-        logit = model(board, wave_id, merc_feat).squeeze()
-        pct   = torch.sigmoid(logit).item() * 100.0
+        pct = model(board, wave_id, merc_feat).squeeze().item() * 100.0
     return pct
+
 
 
 # ── CLI entry-point ───────────────────────────────────────────────
