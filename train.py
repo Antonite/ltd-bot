@@ -1,5 +1,5 @@
-# train.py — Parquet-shard trainer with fresh-start checkpoints
-# -----------------------------------------------------------------
+# train.py — Parquet-shard trainer (full-precision, no AMP)
+# -------------------------------------------------------------------------
 import os, math, random, json, glob, numpy as np, timm
 from datetime import datetime
 
@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.amp import GradScaler, autocast
 from torch.utils.data import IterableDataset, DataLoader, get_worker_info
 from torch.utils.tensorboard import SummaryWriter
 
@@ -37,13 +36,13 @@ LOG_DIR       = f"runs/{datetime.now().strftime('%Y%m%d_%H%M')}"
 BATCH         = 512
 NUM_WORKERS   = 16
 PREFETCH      = 8
-LR            = 4e-3
+LR            = 3e-3
 WEIGHT_DECAY  = 1e-4
 SAVE_EVERY    = 1_000
 NUM_EPOCHS    = 10
 
 WAVE_MAX      = 20
-NF            = len(FIGHTERS)           # index of stack channel
+NF            = len(FIGHTERS)
 DEVICE        = "cuda"
 
 # fixed positional grids (share storage with shared.py)
@@ -72,13 +71,16 @@ def eval_manual_tests(model):
         for case in TEST_CASES:
             board = build_to_tensor(case["export"]).unsqueeze(0).to(DEVICE)
             wave  = torch.tensor([[case["wave"] - 1]], dtype=torch.long, device=DEVICE)
-            merc_val = case["merc"]
+
             merc_feat = torch.tensor(
-                [[math.log1p(min(merc_val, MERC_CLIP)) / math.log1p(MERC_CLIP)]],
+                [[math.log1p(min(case["merc"], MERC_CLIP)) / math.log1p(MERC_CLIP)]],
                 dtype=torch.float32, device=DEVICE,
             )
-            pct = model(board, wave, merc_feat).item() * 100.0
-            diff = abs(pct - case["expected_leak"])
+
+            logit = model(board, wave, merc_feat).squeeze()
+            pct   = torch.sigmoid(logit).item() * 100.0
+
+            diff   = abs(pct - case["expected_leak"])
             tot_err += diff
             passed  += diff <= 5.0
     model.train()
@@ -177,12 +179,49 @@ class WaveDataset(IterableDataset):
 # -------------------------------------------------------------------------
 # DataLoader factory
 # -------------------------------------------------------------------------
-def get_loader(epoch_seed):
-    ds = WaveDataset(SHARDS, epoch_seed)
+class OnTheFlyWeighted(torch.utils.data.IterableDataset):
+    """
+    Wraps a streaming dataset and yields at most `num_samples` items per epoch.
+    Every row is kept with probability weight / max_weight, where
+        weight = pos_w if target > 0  else neg_w
+    """
+    def __init__(self, base_ds, *, pos_w=1.0, neg_w=5.0,
+                 num_samples=None, seed=0):
+        super().__init__()
+        self.base_ds     = base_ds
+        self.pos_w       = pos_w
+        self.neg_w       = neg_w
+        self.num_samples = num_samples
+        self.seed        = seed
+        self._w_max      = max(pos_w, neg_w)
+
+    def __iter__(self):
+        worker = torch.utils.data.get_worker_info()
+        wid    = worker.id if worker else 0
+        rng    = np.random.default_rng(self.seed + wid)
+
+        yielded = 0
+        for sample in self.base_ds:                      # stream as usual
+            w = self.pos_w if sample[3] > 0 else self.neg_w     # s[3] is target
+            if rng.random() < w / self._w_max:           # accept / reject
+                yield sample
+                yielded += 1
+                if self.num_samples and yielded >= self.num_samples:
+                    break
+
+def get_loader(epoch_seed: int):
+    base = WaveDataset(SHARDS, epoch_seed)
+    ds   = OnTheFlyWeighted(
+        base,
+        pos_w=1.0,
+        neg_w=5.0,
+        num_samples=BATCH * STEPS_PER_EPOCH,
+        seed=epoch_seed,
+    )
     return DataLoader(
         ds,
         batch_size=BATCH,
-        shuffle=False,           # dataset handles full-epoch shuffling
+        shuffle=False,
         num_workers=NUM_WORKERS,
         pin_memory=True,
         prefetch_factor=PREFETCH,
@@ -193,11 +232,11 @@ def get_loader(epoch_seed):
 # Model
 # -------------------------------------------------------------------------
 class WaveModel(nn.Module):
-    """CNN encoder (board) + embeddings (wave, mercenary features)."""
+    """CNN encoder (board) + embeddings (wave, merc features)."""
     def __init__(self):
         super().__init__()
 
-        patch_size = 2                       # keeps 14×9 spatial map
+        patch_size = 2
         self.cnn = timm.create_model(
             "convnextv2_nano",
             patch_size=patch_size,
@@ -206,20 +245,19 @@ class WaveModel(nn.Module):
             pretrained=False,
             drop_path_rate=0.1,
         )
-        self._divisor = patch_size * 8       # pad so H,W are multiples of this
+        self._divisor = patch_size * 8      # pad so H,W % 16 == 0
 
         self.wave_emb = nn.Embedding(WAVE_MAX, 8)
         self.merc_mlp = nn.Sequential(
             nn.Linear(1, 8), nn.ReLU(), nn.Linear(8, 4)
         )
 
-        # ── **bounded output: 0 ≤ y ≤ 1** ──────────────────────────
+        # ***NO final sigmoid here – returns raw logits***
         self.head = nn.Sequential(
             nn.Linear(self.cnn.num_features + 8 + 4, 256),
             nn.GELU(),
             nn.Dropout(0.1),
             nn.Linear(256, 1),
-            nn.Sigmoid(),
         )
 
     def forward(self, board, wave_id, merc_feat):
@@ -227,7 +265,7 @@ class WaveModel(nn.Module):
         pad_h = (self._divisor - h % self._divisor) % self._divisor
         pad_w = (self._divisor - w % self._divisor) % self._divisor
         if pad_h or pad_w:
-            board = F.pad(board, (0, pad_w, 0, pad_h), value=0.0)
+            board = F.pad(board, (0, pad_w, 0, pad_h))
 
         z_img  = self.cnn(board)
         z_wave = self.wave_emb(wave_id.squeeze(-1))
@@ -235,26 +273,24 @@ class WaveModel(nn.Module):
         return self.head(torch.cat([z_img, z_wave, z_merc], 1))
 
 # -------------------------------------------------------------------------
-# Checkpoint helpers (no step counts)
+# Checkpoint helpers
 # -------------------------------------------------------------------------
-def save_ckpt(model, opt, scaler):
+def save_ckpt(model, opt):
     os.makedirs(os.path.dirname(CKPT_PATH) or ".", exist_ok=True)
     torch.save(
         {
             "model": model.state_dict(),
             "optim": opt.state_dict(),
-            "scaler": scaler.state_dict(),
         },
         CKPT_PATH,
     )
 
-def load_ckpt(model, opt, scaler):
+def load_ckpt(model, opt):
     if not os.path.isfile(CKPT_PATH):
         return
     ckpt = torch.load(CKPT_PATH, map_location="cpu")
     model.load_state_dict(ckpt["model"])
     opt.load_state_dict(ckpt["optim"])
-    scaler.load_state_dict(ckpt["scaler"])
 
 # -------------------------------------------------------------------------
 # Training loop
@@ -263,18 +299,17 @@ def train():
     model = WaveModel().to(DEVICE)
     model = torch.compile(model, backend="eager")
 
-    opt    = optim.AdamW(
+    opt = optim.AdamW(
         model.parameters(),
         lr=LR,
         weight_decay=WEIGHT_DECAY,
         fused=True,
     )
-    scaler = GradScaler(enabled=False)
 
-    load_ckpt(model, opt, scaler)           # weights & states, but fresh step/epoch
+    load_ckpt(model, opt)           # weights & states, but fresh step/epoch
 
     writer        = SummaryWriter(LOG_DIR)
-    loss_fn       = nn.SmoothL1Loss(beta=0.05)
+    loss_fn       = nn.BCEWithLogitsLoss()
 
     step          = 0
     running_loss  = 0.0
@@ -282,7 +317,7 @@ def train():
 
     try:
         for epoch in range(NUM_EPOCHS):
-            loader = get_loader(base_seed + epoch)  # fresh permutation per epoch
+            loader = get_loader(base_seed + epoch)
             for batch_idx, (boards, wave_ids, merc_feats, targets) in enumerate(loader):
 
                 boards, wave_ids, merc_feats, targets = (
@@ -293,15 +328,13 @@ def train():
                 )
 
                 opt.zero_grad(set_to_none=True)
-                with autocast(device_type="cuda", enabled=False):
-                    preds = model(boards, wave_ids, merc_feats).squeeze()
-                    loss  = loss_fn(preds, targets.squeeze())
 
-                scaler.scale(loss).backward()
-                scaler.unscale_(opt)
+                preds = model(boards, wave_ids, merc_feats).squeeze()
+                loss  = loss_fn(preds, targets.squeeze())
+
+                loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                scaler.step(opt)
-                scaler.update()
+                opt.step()
 
                 step += 1
                 running_loss += loss.item()
@@ -313,14 +346,14 @@ def train():
                         err, rate = eval_manual_tests(model)
                         writer.add_scalar("train/validate mean error %", err,  step)
                         writer.add_scalar("train/validate tests passed %",  rate, step)
-                    save_ckpt(model, opt, scaler)
+                    save_ckpt(model, opt)
 
-            save_ckpt(model, opt, scaler)
+            save_ckpt(model, opt)
             print(f"epoch complete: {epoch + 1}/{NUM_EPOCHS}")
 
     except KeyboardInterrupt:
         print("\n[info] Interrupted — saving checkpoint…")
-        save_ckpt(model, opt, scaler)
+        save_ckpt(model, opt)
 
 # -------------------------------------------------------------------------
 # Entry point

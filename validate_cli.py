@@ -19,7 +19,7 @@ TOLERANCE = 5.0
 
 
 # ── single-case inference ─────────────────────────────────────────
-def _predict(model: torch.nn.Module, device: str, case: dict) -> float:
+def _predict(model, device: str, case: dict) -> float:
     """Return predicted leak % for one test case."""
     board = build_to_tensor(case["export"]).unsqueeze(0).to(device)
 
@@ -33,7 +33,10 @@ def _predict(model: torch.nn.Module, device: str, case: dict) -> float:
     )
 
     with torch.no_grad():
-        return model(board, wave_id, merc_feat).item() * 100.0
+        # logits ➜ probability, then scale to %
+        logit = model(board, wave_id, merc_feat).squeeze()
+        pct   = torch.sigmoid(logit).item() * 100.0
+    return pct
 
 
 # ── CLI entry-point ───────────────────────────────────────────────
