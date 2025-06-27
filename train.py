@@ -2,6 +2,8 @@
 # -------------------------------------------------------------------------
 import os, math, random, json, glob, numpy as np, timm
 from datetime import datetime
+from dataclasses import dataclass
+from typing import Optional 
 
 import torch
 import torch.nn as nn
@@ -12,8 +14,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 import pyarrow.parquet as pq
 import pymongo
-
-os.environ["PYTORCH_DATASET_DEBUG"] = "1"
 
 from shared import (
     build_to_tensor,
@@ -45,9 +45,13 @@ WAVE_MAX      = 20
 NF            = len(FIGHTERS)
 DEVICE        = "cuda"
 
+# class-balance weights (shared by dataset and sampler)
+POS_W = 4.0
+NEG_W = 1.0
+
 # fixed positional grids (share storage with shared.py)
-_X_GRID = torch.linspace(0, 1, BOARD_W,  dtype=torch.float32).repeat(BOARD_H, 1)
-_Y_GRID = torch.linspace(0, 1, BOARD_H,  dtype=torch.float32).unsqueeze(1).repeat(1, BOARD_W)
+_X_GRID = torch.linspace(0, 1, BOARD_W, dtype=torch.float32).repeat(BOARD_H, 1)
+_Y_GRID = torch.linspace(0, 1, BOARD_H, dtype=torch.float32).unsqueeze(1).repeat(1, BOARD_W)
 
 # -------------------------------------------------------------------------
 # Dataset-wide helpers
@@ -55,8 +59,8 @@ _Y_GRID = torch.linspace(0, 1, BOARD_H,  dtype=torch.float32).unsqueeze(1).repea
 def _count_rows(paths):
     return sum(pq.ParquetFile(p).metadata.num_rows for p in paths)
 
-DOCS             = _count_rows(SHARDS)
-STEPS_PER_EPOCH  = math.ceil(DOCS / BATCH)
+DOCS            = _count_rows(SHARDS)
+STEPS_PER_EPOCH = math.ceil(DOCS / BATCH)
 
 # -------------------------------------------------------------------------
 # Optional manual regression tests
@@ -89,6 +93,17 @@ def eval_manual_tests(model):
 # -------------------------------------------------------------------------
 # Parquet-sharded dataset
 # -------------------------------------------------------------------------
+@dataclass
+class WaveSample:
+    board:     torch.Tensor   # (C,H,W) float32
+    wave_id:   torch.Tensor   # ()  long
+    merc_feat: torch.Tensor   # ()  float32 (log-scaled)
+    target:    torch.Tensor   # ()  float32
+
+    @property
+    def weight(self) -> float:
+        return POS_W if self.target.item() > 0 else NEG_W
+
 class WaveDataset(IterableDataset):
     """Streams every Parquet row exactly once per epoch, with augments."""
     def __init__(self, shard_paths, epoch_seed=0):
@@ -121,7 +136,7 @@ class WaveDataset(IterableDataset):
     # ---------------------------------------------------------------------
     # row → tensors
     # ---------------------------------------------------------------------
-    def _row_to_sample(self, tbl, loc, rng):
+    def _row_to_sample(self, tbl, loc, rng) -> Optional[WaveSample]:
         _id        = tbl["_id"][loc]
         total_leak = float(tbl["totalLeaked"][loc])
         total_occ  = float(tbl["totalOccurrences"][loc])
@@ -136,8 +151,8 @@ class WaveDataset(IterableDataset):
         frac = (total_leak / total_occ) / threat
         if frac > 1.0001:
             return None
-        if frac == 0.0 and random.random() > 0.1:
-            return None                      # down-sample perfect holds
+        if frac == 0.0 and random.random() > 0.1:   # down-sample perfect holds
+            return None
 
         # ── board tensor ────────────────────────────────────────────
         board = torch.zeros((C_IN, BOARD_H, BOARD_W), dtype=torch.float32)
@@ -158,63 +173,59 @@ class WaveDataset(IterableDataset):
                     norm = min(int(st), max_stack) / max_stack
                     board[NF, y:y + 2, x:x + 2] = norm
 
-        # positional channels (always)
+        # positional channels
         board[NF + 1] = _X_GRID
         board[NF + 2] = _Y_GRID
 
-        # 50 % horizontal flip for augmentation
+        # 50 % horizontal flip
         if rng.random() < 0.5:
-            board = torch.flip(board, dims=[2])        # flip W-axis
-            board[NF + 1] = 1.0 - board[NF + 1]        # fix x-coord
+            board = torch.flip(board, dims=[2])     # flip W-axis
+            board[NF + 1] = 1.0 - board[NF + 1]
 
-        # scalars
-        wave_id   = torch.tensor([wave_num - 1], dtype=torch.long)
+        # scalars (0-D tensors)
+        wave_id   = torch.tensor(wave_num - 1, dtype=torch.long)
         merc_feat = torch.tensor(
-            [math.log1p(min(merc_bounty, MERC_CLIP)) / math.log1p(MERC_CLIP)],
+            math.log1p(min(merc_bounty, MERC_CLIP)) / math.log1p(MERC_CLIP),
             dtype=torch.float32,
         )
-        target = torch.tensor([frac], dtype=torch.float32)
-        return board, wave_id, merc_feat, target
+        target = torch.tensor(frac, dtype=torch.float32)
+        return WaveSample(board, wave_id, merc_feat, target)
 
 # -------------------------------------------------------------------------
 # DataLoader factory
 # -------------------------------------------------------------------------
-class OnTheFlyWeighted(torch.utils.data.IterableDataset):
-    """
-    Wraps a streaming dataset and yields at most `num_samples` items per epoch.
-    Every row is kept with probability weight / max_weight, where
-        weight = pos_w if target > 0  else neg_w
-    """
-    def __init__(self, base_ds, *, pos_w, neg_w,
-                 num_samples=None, seed=0):
+class OnTheFlyWeighted(IterableDataset):
+    def __init__(self, base_ds, *, pos_w: float, neg_w: float,
+                 num_samples: int | None = None, seed: int = 0):
         super().__init__()
         self.base_ds     = base_ds
-        self.pos_w       = pos_w
-        self.neg_w       = neg_w
+        self.pos_w, self.neg_w = pos_w, neg_w
         self.num_samples = num_samples
         self.seed        = seed
         self._w_max      = max(pos_w, neg_w)
 
     def __iter__(self):
-        worker = torch.utils.data.get_worker_info()
-        wid    = worker.id if worker else 0
-        rng    = np.random.default_rng(self.seed + wid)
-
-        yielded = 0
-        for sample in self.base_ds:                      # stream as usual
-            w = self.pos_w if sample[3] > 0 else self.neg_w     # s[3] is target
-            if rng.random() < w / self._w_max:           # accept / reject
-                yield sample
-                yielded += 1
-                if self.num_samples and yielded >= self.num_samples:
+        info  = torch.utils.data.get_worker_info()
+        rng   = np.random.default_rng(self.seed + (info.id if info else 0))
+        count = 0
+        for sample in self.base_ds:
+            if rng.random() < sample.weight / self._w_max:
+                yield (
+                    sample.board,
+                    sample.wave_id.unsqueeze(0),
+                    sample.merc_feat.unsqueeze(0),
+                    sample.target.unsqueeze(0),
+                )
+                count += 1
+                if self.num_samples and count >= self.num_samples:
                     break
 
 def get_loader(epoch_seed: int):
     base = WaveDataset(SHARDS, epoch_seed)
     ds   = OnTheFlyWeighted(
         base,
-        pos_w=4.0,
-        neg_w=1.0,
+        pos_w=POS_W,
+        neg_w=NEG_W,
         num_samples=BATCH * STEPS_PER_EPOCH,
         seed=epoch_seed,
     )
@@ -252,13 +263,11 @@ class WaveModel(nn.Module):
             nn.Linear(1, 8), nn.ReLU(), nn.Linear(8, 4)
         )
 
-        # ***NO final sigmoid here – returns raw logits***
         self.head = nn.Sequential(
             nn.Linear(self.cnn.num_features + 8 + 4, 256),
             nn.GELU(),
             nn.Dropout(0.1),
-            nn.Linear(256, 1),
-            nn.Sigmoid(),          # output ∈ [0, 1]
+            nn.Linear(256, 1),             # raw logits
         )
 
     def forward(self, board, wave_id, merc_feat):
@@ -278,13 +287,8 @@ class WaveModel(nn.Module):
 # -------------------------------------------------------------------------
 def save_ckpt(model, opt):
     os.makedirs(os.path.dirname(CKPT_PATH) or ".", exist_ok=True)
-    torch.save(
-        {
-            "model": model.state_dict(),
-            "optim": opt.state_dict(),
-        },
-        CKPT_PATH,
-    )
+    torch.save({"model": model.state_dict(),
+                "optim": opt.state_dict()}, CKPT_PATH)
 
 def load_ckpt(model, opt):
     if not os.path.isfile(CKPT_PATH):
@@ -307,20 +311,19 @@ def train():
         fused=True,
     )
 
-    load_ckpt(model, opt)           # weights & states, but fresh step/epoch
+    load_ckpt(model, opt)                         # resume if possible
 
     writer        = SummaryWriter(LOG_DIR)
-    loss_fn       = nn.SmoothL1Loss(beta=0.02)
+    loss_fn       = nn.BCEWithLogitsLoss()
 
     step          = 0
     running_loss  = 0.0
-    base_seed     = random.randint(0, 2**31 - 1)   # new shuffle seed each run
+    base_seed     = random.randint(0, 2**31 - 1)
 
     try:
         for epoch in range(NUM_EPOCHS):
             loader = get_loader(base_seed + epoch)
-            for batch_idx, (boards, wave_ids, merc_feats, targets) in enumerate(loader):
-
+            for boards, wave_ids, merc_feats, targets in loader:
                 boards, wave_ids, merc_feats, targets = (
                     boards.to(DEVICE, non_blocking=True),
                     wave_ids.to(DEVICE, non_blocking=True),
@@ -350,7 +353,7 @@ def train():
                     save_ckpt(model, opt)
 
             save_ckpt(model, opt)
-            print(f"epoch complete: {epoch + 1}/{NUM_EPOCHS}")
+            print(f"epoch {epoch + 1}/{NUM_EPOCHS} complete")
 
     except KeyboardInterrupt:
         print("\n[info] Interrupted — saving checkpoint…")

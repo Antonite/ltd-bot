@@ -18,11 +18,9 @@ from train  import WaveModel, CKPT_PATH    # ← matches train.py
 TOLERANCE = 5.0
 
 
-# ── single-case inference ─────────────────────────────────────────
 def _predict(model, device: str, case: dict) -> float:
     """Return predicted leak % for one test case."""
-    board = build_to_tensor(case["export"]).unsqueeze(0).to(device)
-
+    board   = build_to_tensor(case["export"]).unsqueeze(0).to(device)
     wave_id = torch.tensor([[case["wave"] - 1]], dtype=torch.long, device=device)
 
     merc_val  = min(case["merc"], MERC_CLIP)
@@ -32,7 +30,8 @@ def _predict(model, device: str, case: dict) -> float:
     )
 
     with torch.no_grad():
-        pct = model(board, wave_id, merc_feat).squeeze().item() * 100.0
+        logit = model(board, wave_id, merc_feat).squeeze()
+        pct   = torch.sigmoid(logit).item() * 100.0   # ← apply sigmoid here
     return pct
 
 
