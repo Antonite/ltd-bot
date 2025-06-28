@@ -308,7 +308,7 @@ def train():
         weight_decay=WEIGHT_DECAY,
         fused=True,
     )
-    load_ckpt(model, opt=None)
+    load_ckpt(model, opt)
     model = torch.compile(model, backend="eager")
 
     writer        = SummaryWriter(LOG_DIR)
