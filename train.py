@@ -34,9 +34,9 @@ CKPT_PATH     = "checkpoints/waveconvnext.chkpt"
 LOG_DIR       = f"runs/{datetime.now().strftime('%Y%m%d_%H%M')}"
 
 BATCH         = 512
-NUM_WORKERS   = 16
+NUM_WORKERS   = 12
 PREFETCH      = 8
-LR            = 3e-3
+LR            = 1e-4
 WEIGHT_DECAY  = 1e-4
 SAVE_EVERY    = 1_000
 NUM_EPOCHS    = 10
@@ -302,23 +302,22 @@ def load_ckpt(model, opt):
 # -------------------------------------------------------------------------
 def train():
     model = WaveModel().to(DEVICE)
-    model = torch.compile(model, backend="eager")
-
     opt = optim.AdamW(
         model.parameters(),
-        lr=LR,
+        lr=1e-4,                               
         weight_decay=WEIGHT_DECAY,
         fused=True,
     )
-
-    load_ckpt(model, opt)                         # resume if possible
+    load_ckpt(model, opt=None)
+    model = torch.compile(model, backend="eager")
 
     writer        = SummaryWriter(LOG_DIR)
-    loss_fn       = nn.BCEWithLogitsLoss()
 
-    step          = 0
-    running_loss  = 0.0
-    base_seed     = random.randint(0, 2**31 - 1)
+    # IMPORTANT: targets are *continuous leak fractions* (0-1) →
+    #            use a *regression* loss, NOT BCE.
+    loss_fn       = nn.SmoothL1Loss(beta=0.01)
+
+    step, running_loss, base_seed = 0, 0.0, random.randint(0, 2**31 - 1)
 
     try:
         for epoch in range(NUM_EPOCHS):
@@ -330,14 +329,14 @@ def train():
                     merc_feats.to(DEVICE, non_blocking=True),
                     targets.to(DEVICE, non_blocking=True),
                 )
-
                 opt.zero_grad(set_to_none=True)
 
-                preds = model(boards, wave_ids, merc_feats).squeeze()
-                loss  = loss_fn(preds, targets.squeeze())
+                logits = model(boards, wave_ids, merc_feats).squeeze()
+                preds  = torch.sigmoid(logits)          # 0–1 leak fraction
+                loss   = loss_fn(preds, targets.squeeze())
 
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
                 opt.step()
 
                 step += 1
@@ -351,13 +350,12 @@ def train():
                         writer.add_scalar("train/validate mean error %", err,  step)
                         writer.add_scalar("train/validate tests passed %",  rate, step)
                     save_ckpt(model, opt)
-
-            save_ckpt(model, opt)
-            print(f"epoch {epoch + 1}/{NUM_EPOCHS} complete")
-
-    except KeyboardInterrupt:
-        print("\n[info] Interrupted — saving checkpoint…")
         save_ckpt(model, opt)
+    except KeyboardInterrupt:
+        print("saving...")
+        save_ckpt(model, opt)
+        print("saved")
+
 
 # -------------------------------------------------------------------------
 # Entry point
