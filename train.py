@@ -39,14 +39,14 @@ PREFETCH      = 8
 LR            = 1e-4
 WEIGHT_DECAY  = 1e-4
 SAVE_EVERY    = 1_000
-NUM_EPOCHS    = 10
+NUM_EPOCHS    = 5
 
 WAVE_MAX      = 20
 NF            = len(FIGHTERS)
 DEVICE        = "cuda"
 
 # class-balance weights (shared by dataset and sampler)
-POS_W = 4.0
+POS_W = 5.0
 NEG_W = 1.0
 
 # fixed positional grids (share storage with shared.py)
@@ -58,9 +58,16 @@ _Y_GRID = torch.linspace(0, 1, BOARD_H, dtype=torch.float32).unsqueeze(1).repeat
 # -------------------------------------------------------------------------
 def _count_rows(paths):
     return sum(pq.ParquetFile(p).metadata.num_rows for p in paths)
-
 DOCS            = _count_rows(SHARDS)
 STEPS_PER_EPOCH = math.ceil(DOCS / BATCH)
+
+# -------------------------------------------------------------------------
+# Cosine LR helper
+# -------------------------------------------------------------------------
+LR_MAX       = 8e-5      # learning-rate at step 0
+LR_MIN       = 3e-5      # learning-rate floor
+TOTAL_STEPS  = round(NUM_EPOCHS * STEPS_PER_EPOCH / 5)
+
 
 # -------------------------------------------------------------------------
 # Optional manual regression tests
@@ -281,43 +288,50 @@ class WaveModel(nn.Module):
         z_wave = self.wave_emb(wave_id.squeeze(-1))
         z_merc = self.merc_mlp(merc_feat)
         return self.head(torch.cat([z_img, z_wave, z_merc], 1))
-
+    
 # -------------------------------------------------------------------------
 # Checkpoint helpers
 # -------------------------------------------------------------------------
-def save_ckpt(model, opt):
+def save_ckpt(model, opt, step: int):
     os.makedirs(os.path.dirname(CKPT_PATH) or ".", exist_ok=True)
-    torch.save({"model": model.state_dict(),
-                "optim": opt.state_dict()}, CKPT_PATH)
+    torch.save(
+        {
+            "model": model.state_dict(),
+            "optim": opt.state_dict(),
+            "step":  step,              # track progress for LR schedule
+        },
+        CKPT_PATH,
+    )
 
-def load_ckpt(model, opt):
+def load_ckpt(model, opt) -> int:
     if not os.path.isfile(CKPT_PATH):
-        return
+        return 0
     ckpt = torch.load(CKPT_PATH, map_location="cpu")
     model.load_state_dict(ckpt["model"])
     opt.load_state_dict(ckpt["optim"])
+    return ckpt.get("step", 0)         # 0 for old checkpoints
 
 # -------------------------------------------------------------------------
 # Training loop
 # -------------------------------------------------------------------------
 def train():
     model = WaveModel().to(DEVICE)
+    model = torch.compile(model, backend="eager")
     opt = optim.AdamW(
         model.parameters(),
-        lr=1e-4,                               
+        lr=LR_MAX,                     # start at the schedule’s peak
         weight_decay=WEIGHT_DECAY,
         fused=True,
     )
-    load_ckpt(model, opt)
-    model = torch.compile(model, backend="eager")
+    step = load_ckpt(model, opt)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR( 
+        opt, T_max=TOTAL_STEPS, eta_min=LR_MIN
+    )
+    
 
     writer        = SummaryWriter(LOG_DIR)
-
-    # IMPORTANT: targets are *continuous leak fractions* (0-1) →
-    #            use a *regression* loss, NOT BCE.
     loss_fn       = nn.SmoothL1Loss(beta=0.01)
-
-    step, running_loss, base_seed = 0, 0.0, random.randint(0, 2**31 - 1)
+    running_loss, base_seed = 0.0, random.randint(0, 2**31 - 1)
 
     try:
         for epoch in range(NUM_EPOCHS):
@@ -329,32 +343,36 @@ def train():
                     merc_feats.to(DEVICE, non_blocking=True),
                     targets.to(DEVICE, non_blocking=True),
                 )
+
                 opt.zero_grad(set_to_none=True)
-
                 logits = model(boards, wave_ids, merc_feats).squeeze()
-                preds  = torch.sigmoid(logits)          # 0–1 leak fraction
+                preds  = torch.sigmoid(logits)
                 loss   = loss_fn(preds, targets.squeeze())
-
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
-                opt.step()
-
+                
                 step += 1
-                running_loss += loss.item()
+                opt.step()
+                scheduler.step()
 
+                running_loss += loss.item()
                 if step % SAVE_EVERY == 0:
                     writer.add_scalar("train/loss_avg", running_loss / SAVE_EVERY, step)
+                    writer.add_scalar("train/lr",       scheduler.get_last_lr()[0],                    step)
                     running_loss = 0.0
                     if TEST_CASES:
                         err, rate = eval_manual_tests(model)
                         writer.add_scalar("train/validate mean error %", err,  step)
                         writer.add_scalar("train/validate tests passed %",  rate, step)
-                    save_ckpt(model, opt)
-        save_ckpt(model, opt)
+                    save_ckpt(model, opt, step)
+            print(f"epic {epoch + 1} complete")
+
+        save_ckpt(model, opt, step)
     except KeyboardInterrupt:
-        print("saving...")
-        save_ckpt(model, opt)
+        print("saving…")
+        save_ckpt(model, opt, step)
         print("saved")
+
 
 
 # -------------------------------------------------------------------------
