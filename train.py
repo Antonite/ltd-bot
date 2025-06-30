@@ -1,4 +1,8 @@
-# train.py — Parquet-shard trainer (full-precision, no AMP)
+# train.py — Parquet-shard trainer 
+# full-precision, no AMP desired
+# parquet files contain about 50 million unique positions
+# about 40% of unique positions do not leak - target is zero
+# trained on a windows machine with a RTX 4090 + 64GB RAM
 # -------------------------------------------------------------------------
 import os, math, random, json, glob, numpy as np, timm
 from datetime import datetime
@@ -33,8 +37,8 @@ SHARDS        = sorted(glob.glob("shards/*.parquet"))
 CKPT_PATH     = "checkpoints/waveconvnext.chkpt"
 LOG_DIR       = f"runs/{datetime.now().strftime('%Y%m%d_%H%M')}"
 
-BATCH         = 512
-NUM_WORKERS   = 12
+BATCH         = 128
+NUM_WORKERS   = 4
 PREFETCH      = 8
 LR            = 1e-4
 WEIGHT_DECAY  = 1e-4
@@ -249,32 +253,37 @@ def get_loader(epoch_seed: int):
 # -------------------------------------------------------------------------
 # Model
 # -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Model (drop-in replacement)
+# -------------------------------------------------------------------------
 class WaveModel(nn.Module):
-    """CNN encoder (board) + embeddings (wave, merc features)."""
+    """Higher-capacity CNN encoder + embeddings."""
     def __init__(self):
         super().__init__()
 
-        patch_size = 2
         self.cnn = timm.create_model(
-            "convnextv2_nano",
-            patch_size=patch_size,
+            "convnextv2_base",
+            patch_size=1,
             in_chans=C_IN,
             num_classes=0,
-            pretrained=False,
-            drop_path_rate=0.1,
+            pretrained=False,   # ← train from scratch
+            drop_path_rate=0.2,
         )
-        self._divisor = patch_size * 8      # pad so H,W % 16 == 0
+        self._divisor = 8
 
-        self.wave_emb = nn.Embedding(WAVE_MAX, 8)
+        self.wave_emb = nn.Embedding(WAVE_MAX, 16)
         self.merc_mlp = nn.Sequential(
-            nn.Linear(1, 8), nn.ReLU(), nn.Linear(8, 4)
+            nn.Linear(1, 16), nn.GELU(), nn.Linear(16, 8)
         )
 
         self.head = nn.Sequential(
-            nn.Linear(self.cnn.num_features + 8 + 4, 256),
+            nn.Linear(self.cnn.num_features + 16 + 8, 512),
             nn.GELU(),
-            nn.Dropout(0.1),
-            nn.Linear(256, 1),             # raw logits
+            nn.Dropout(0.25),
+            nn.Linear(512, 128),
+            nn.GELU(),
+            nn.Dropout(0.25),
+            nn.Linear(128, 1),      # raw logits
         )
 
     def forward(self, board, wave_id, merc_feat):
