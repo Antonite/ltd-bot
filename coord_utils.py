@@ -1,10 +1,10 @@
 """
-Utilities for converting a Legion TD 2 exporter board into the
+Utilities for converting a Legion TD 2 exporter board into the
 'uid:x|y:stack' strings understood by predict_cli.build_to_tensor.
 """
 
 from __future__ import annotations
-import json
+import json, math
 from typing import List, Dict, Any
 
 # ——— constants taken from exporter/game geometry ———
@@ -13,23 +13,31 @@ from typing import List, Dict, Any
 _X_OFFSET = 4.5
 _Y_OFFSET = 7.0
 
+def half_tile_coord_to_index(v: float) -> int:
+    """
+    Convert build-space half-tile coordinate (…, 0.5 ,1.5 ,2.5 …) to the
+    top-left grid index in the 0.5-cell grid (width = 18, height = 28).
+
+    Example: 0.5 → 0, 1.5 → 2, 8.5 → 16
+    """
+    return int(math.floor(v * 2.0 + 1e-6)) - 1     # robust to FP noise
 
 def exporter_xy_to_build_xy(x: float, z: float) -> tuple[float, float]:
     """
-    Translate exporter coordinates (X, Z) to the 'build' coordinate system.
+    Translate exporter coordinates (X, Z) to the 'build' coordinate system.
 
     Equation (fitted from your example):
         build_x = X + 4.5
         build_y = Z + 7
 
-    Both systems use half‑tile (0.5) precision, so no extra rounding is needed.
+    Both systems use half-tile (0.5) precision, so no extra rounding is needed.
     """
     return x + _X_OFFSET, z + _Y_OFFSET
 
 
 def export_to_build(export_board: str | Dict[str, Any]) -> List[str]:
     """
-    Convert a Legion TD 2 exporter board (JSON string or already‑parsed dict)
+    Convert a Legion TD 2 exporter board (JSON string or already-parsed dict)
     into the list of 'uid:x|y:stack' strings used by predict_cli.py.
     """
     if isinstance(export_board, str):

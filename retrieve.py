@@ -1,6 +1,7 @@
 import requests
 import pymongo
 import datetime
+from zoneinfo import ZoneInfo  # Python ≥3.9
 import os
 
 API_KEY = os.environ["LTD2_API_KEY"]
@@ -8,28 +9,36 @@ HEADERS = {"x-api-key": API_KEY}
 
 # Mongo connection (local)
 client = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
-db = client["legiontd2"]  
+db = client["legiontd2"]
 
-# Collections
-games_collection = db["games"]
+# Collections (non-game collections stay the same)
 units_collection = db["units"]
 waves_collection = db["waves"]
-fetch_state_collection = db["fetchState"]
+spells_collection = db["spells"]
 
-DAILY_LIMIT = 1000
+DAILY_LIMIT = 1000  # still respected inside fetch_one_day
+
+
+# ---------- non-game helpers (unchanged) ----------
+
+def fetch_spells():
+    base_url = "https://apiv2.legiontd2.com/info/spells/0/50"
+    params = {"enabled": "true"}
+    resp = requests.get(base_url, headers=HEADERS, params=params)
+    if resp.status_code != 200:
+        print("Error fetching spells:", resp.status_code)
+        return
+
+    spell_list = resp.json()
+    for spell_doc in spell_list:
+        _id = spell_doc.pop("_id", "unknown")
+        spells_collection.update_one({"_id": _id}, {"$set": spell_doc}, upsert=True)
+    print(f"Fetched & upserted {len(spell_list)} spells.")
+
 
 def fetch_units(version=None, limit=300):
-    """
-    Fetch multiple units for a given version from /units/byVersion/{version}.
-    If version is not specified, you can pass the most recent version from the API.
-    'limit=300' fetches all units in one go.
-    """
-
     base_url = f"https://apiv2.legiontd2.com/units/byVersion/{version}"
-    params = {
-        "enabled": "true",  # Set to False if you also want disabled units
-        "limit": limit
-    }
+    params = {"enabled": "true", "limit": limit}
     resp = requests.get(base_url, headers=HEADERS, params=params)
     if resp.status_code != 200:
         print("Error fetching units:", resp.status_code)
@@ -37,23 +46,14 @@ def fetch_units(version=None, limit=300):
 
     unit_list = resp.json()
     for unit_doc in unit_list:
-        # Construct a unique _id, e.g. "unitId_version"
-        # The API might not give a simple 'id' for units, so you can combine name + version or sortHelper + version
         name = unit_doc.get("name", "unknown")
-        doc_id = f"{name}_{version}"  # or use sortHelper
+        doc_id = f"{name}_{version}"
         unit_doc.pop("_id", None)
-        units_collection.update_one(
-            {"_id": doc_id},
-            {"$set": unit_doc},
-            upsert=True
-        )
+        units_collection.update_one({"_id": doc_id}, {"$set": unit_doc}, upsert=True)
     print(f"Fetched & upserted {len(unit_list)} units for version '{version}'.")
 
+
 def fetch_waves(offset=0, limit=50):
-    """
-    Fetch waves in batches (50 is the max recommended) from /info/waves/{offset}/{limit}.
-    Keep incrementing offset until no more.
-    """
     while True:
         base_url = f"https://apiv2.legiontd2.com/info/waves/{offset}/{limit}"
         resp = requests.get(base_url, headers=HEADERS)
@@ -64,81 +64,37 @@ def fetch_waves(offset=0, limit=50):
         wave_list = resp.json()
         if not wave_list:
             break
-        
-        # Upsert each wave by its 'id'
+
         for wave_doc in wave_list:
-            wave_id = wave_doc.get("_id")
+            wave_id = wave_doc.pop("_id", None)
             if wave_id:
-                wave_doc.pop("_id", None)
-                waves_collection.update_one(
-                    {"_id": wave_id},
-                    {"$set": wave_doc},
-                    upsert=True
-                )
+                waves_collection.update_one({"_id": wave_id}, {"$set": wave_doc}, upsert=True)
         print(f"Fetched & upserted {len(wave_list)} waves (offset={offset}).")
 
         if len(wave_list) < limit:
             break
         offset += limit
 
-def get_fetch_state():
-    """
-    Retrieves current fetch state from the fetchState collection.
-    If none exists, create a default (yesterday, offset=0, etc.).
-    """
-    state = fetch_state_collection.find_one({"_id": "games_fetch"})
-    if state is None:
-        # default to starting from yesterday
-        yesterday = datetime.datetime.now(datetime.UTC).date() - datetime.timedelta(days=1)
-        state = {
-            "_id": "games_fetch",
-            "currentDate": str(yesterday),  # store as string "YYYY-MM-DD"
-            "currentOffset": 0,
-            "requestsUsedToday": 0,
-            "dailyLimit": DAILY_LIMIT
-        }
-        fetch_state_collection.insert_one(state)
-    return state
 
-def save_fetch_state(state):
-    """
-    Save the updated fetch state doc back to Mongo.
-    """
-    fetch_state_collection.update_one(
-        {"_id": "games_fetch"},
-        {"$set": state},
-        upsert=True
-    )
+# ---------- game fetch ----------
 
-def fetch_one_day(date_str, start_offset, requests_used, daily_limit):
+def fetch_one_day(date_str, start_offset, requests_used, daily_limit, games_collection):
     """
-    Fetches up to one day of games from date_str (e.g. "2023-07-04"),
-    starting at offset = start_offset, returning:
-      - new_offset: where we ended
-      - requests_used: how many requests were used
-      - done_for_day: bool indicating if we fetched all games for that day
-    We’ll stop if we exceed the daily limit or if no more data is returned.
+    Download every game on a single calendar day.
     """
-    # Build date range
-    # For example, 00:00:00 up to 23:59:59 that same day
     date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+    # 00:00 of target day  ≤  game.date  <  00:00 of next day
     date_after = date_obj.strftime("%Y-%m-%d 00:00:00")
-    # Next day => date_obj + 1 day => we do second's minus 1 or something:
-    date_before_obj = date_obj + datetime.timedelta(days=1) - datetime.timedelta(seconds=1)
-    date_before = date_before_obj.strftime("%Y-%m-%d %H:%M:%S")
+    date_before = (date_obj + datetime.timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")
 
-    offset = start_offset
-    limit = 50
-    
+    offset, limit = start_offset, 50
     base_url = "https://apiv2.legiontd2.com/games"
-    
+
     while True:
-        # Check if we can make another request within our daily limit
         if requests_used >= daily_limit:
-            print("Hit daily limit - stopping.")
-            return offset, requests_used, False
-        
-        # Build params
+            print("Hit daily limit – stopping.")
+            return requests_used
+
         params = {
             "limit": limit,
             "offset": offset,
@@ -147,99 +103,63 @@ def fetch_one_day(date_str, start_offset, requests_used, daily_limit):
             "includeDetails": "true",
             "sortBy": "date",
             "sortDirection": 1,
-            "queueType": ["Normal"]  # or other queues
+            "queueType": ["Normal"],
         }
-        
+
         resp = requests.get(base_url, headers=HEADERS, params=params)
         requests_used += 1
-        if resp.status_code == 404:
-            # No more data => we are done with this day
+        if resp.status_code == 404:          # no more data
             break
         if resp.status_code != 200:
             print("Error fetching games:", resp.status_code)
-            # API error. likely out of API requests
-            return offset, requests_used, False
-        
+            break
+
         data = resp.json()
-        
-        # Upsert each match by its unique game '_id'
         for game_doc in data:
             game_id = game_doc.get("_id")
-            if game_id:
-                # remove the _id from doc so we can upsert
-                game_doc.pop("_id", None)
-                if int(game_doc.get("endingWave")) < 2:
-                    continue
-                games_collection.update_one(
-                    {"_id": game_id},
-                    {"$set": game_doc},
-                    upsert=True
-                )
-        
+            if not game_id:
+                continue
+            if int(game_doc.get("endingWave", 0)) < 2:
+                continue
+            game_doc.pop("_id", None)
+            games_collection.update_one({"_id": game_id}, {"$set": game_doc}, upsert=True)
+
         print(f"Fetched & upserted {len(data)} games (offset={offset}) on {date_str}.")
 
-        # If we got fewer than limit, that means no more data remains
         if len(data) < limit:
-            offset += len(data)
             break
-        else:
-            offset += limit
-    
-    # If we exit normally, that means we’re done with this day
-    return offset, requests_used, True
+        offset += limit
+
+    return requests_used
+
+
+# ---------- entry-point ----------
 
 def main():
-    state = get_fetch_state()
-    print("Loaded fetch state:", state)
+    # Local timezone – adjust if needed
+    eastern = ZoneInfo("America/New_York")
 
-    current_date_str = state["currentDate"]
-    current_offset = state["currentOffset"]
-    requests_used = state["requestsUsedToday"]
-    daily_limit = state["dailyLimit"]
+    now_et = datetime.datetime.now(eastern)
+    yesterday = (now_et - datetime.timedelta(days=1)).date()
+    date_str = yesterday.strftime("%Y-%m-%d")
 
-    if requests_used >= daily_limit:
-        requests_used = 0
-    
-    # We’ll do a loop that tries to fetch day by day going backwards
-    while True:
-        print(f"Fetching day {current_date_str} from offset {current_offset}, requests used {requests_used}/{daily_limit}")
-        new_offset, requests_used, done_for_day = fetch_one_day(
-            current_date_str, current_offset, requests_used, daily_limit
-        )
+    collection_name = f"games_{yesterday.strftime('%Y_%m_%d')}"
+    games_collection = db[collection_name]
 
-        print(f"requests used updated {requests_used}")
+    print(f"Starting fetch for {date_str}; results will go to collection '{collection_name}'.")
 
-        current_offset = new_offset
+    fetch_one_day(
+        date_str=date_str,
+        start_offset=0,
+        requests_used=0,
+        daily_limit=DAILY_LIMIT,
+        games_collection=games_collection,
+    )
 
-        # If we are done with that day (no more data or partial fetch that ended), move to previous day
-        if done_for_day:
-            # Move to previous day
-            day_obj = datetime.datetime.strptime(current_date_str, "%Y-%m-%d")
-            prev_day_obj = day_obj - datetime.timedelta(days=1)
-            prev_day_str = prev_day_obj.strftime("%Y-%m-%d")
-            
-            current_date_str = prev_day_str
-            current_offset = 0
-            
-            # We also might reset requestsUsed if you want to handle each day’s limit separately,
-            # but presumably your daily limit resets at real midnight, not per game day. So we keep incrementing.
-            
-            # store new date & offset
-            state["currentDate"] = current_date_str
-            state["currentOffset"] = 0
-            save_fetch_state(state)
-        else:
-            # Save partial progress
-            state["currentOffset"] = current_offset
-            save_fetch_state(state)
-        
-        # If we ran out of daily requests, we stop
-        if requests_used >= daily_limit:
-            print("Reached daily limit. Storing state, exiting.")
-            break
-
-    print("Data fetching complete.")
+    print("Finished fetching yesterday's games.")
 
 
 if __name__ == "__main__":
+    # fetch_units("12.05.3")
+    # fetch_spells()
     main()
