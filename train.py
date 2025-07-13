@@ -68,7 +68,7 @@ LOG_DIR       = f"runs/{datetime.now():%Y%m%d_%H%M}"
 BATCH         = 128
 NUM_WORKERS   = 4
 PREFETCH      = 8
-LR            = 1e-5
+LR            = 1e-4
 WEIGHT_DECAY  = 1e-4
 SAVE_EVERY    = 1_000
 TEST_EVERY    = 5_000
@@ -206,9 +206,10 @@ class WaveDataset(IterableDataset):
                     board[X_CH].copy_(gx)
                     board[Y_CH].copy_(gy)
 
-                    # log-scaled merc-to-wave reward ratio
-                    ratio      = merc_bounty / base_reward        # ≥ 0
-                    log_ratio  = math.log1p(ratio)                # still ≥ 0
+                    # log-clipped merc bounty
+                    log_ratio = math.log1p(
+                        min(merc_bounty, MERC_CLIP)
+                    ) / math.log1p(MERC_CLIP)
 
                     yield WaveSample(
                         board,
@@ -305,7 +306,7 @@ class WaveModel(nn.Module):
 
         # image backbone
         self.cnn = timm.create_model(
-            "convnextv2_tiny",
+            "convnextv2_base",
             patch_size=1,
             in_chans=C_IN,
             num_classes=0,
@@ -314,18 +315,17 @@ class WaveModel(nn.Module):
         )
         self._divisor = 8    # for padding convenience
 
-        # learned merc-ratio scale
+        # merc bounty → 8-d embedding
         self.merc_proj = nn.Sequential(
-            nn.Linear(1, 1),
-            nn.Tanh(),          # output ∈ (−1, 1)
+            nn.Linear(1, 8),
+            nn.GELU(),
         )
 
-        # wave embedding + joint features
         self.wave_emb = nn.Embedding(WAVE_MAX, 8)
         self.joint = nn.Sequential(
-            nn.Linear(8 + 1 + 8, 16),   # w | m | w⊙m
+            nn.Linear(8 + 8, 32),
             nn.GELU(),
-            nn.Linear(16, 16),
+            nn.Linear(32, 16),
         )
 
         # shared trunk
@@ -349,9 +349,9 @@ class WaveModel(nn.Module):
         z_img = self.cnn(board)                         # (N, F)
 
         w = self.wave_emb(wave_id.squeeze(-1))          # (N, 8)
-        m = self.merc_proj(merc_ratio)                  # (N, 1)
+        m = self.merc_proj(merc_ratio)                  # (N, 8)
 
-        z_joint = self.joint(torch.cat([w, m, w*m], dim=1))
+        z_joint = self.joint(torch.cat([w, m], dim=1))
         feats   = self.shared(torch.cat([z_img, z_joint], dim=1))
         return self.out_head(feats)                     # raw logit (N, 1)
 
