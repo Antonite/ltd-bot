@@ -143,6 +143,10 @@ class WaveDataset(IterableDataset):
                 ids          = batch.column("_id").to_pylist()
                 leaks        = batch.column("totalLeaked").to_numpy()
                 total_occ    = batch.column("totalOccurrences").to_numpy()
+                # order = rng.permutation(len(ids))
+                # ids        = [ids[i]        for i in order]
+                # leaks      = leaks[order]
+                # total_occ  = total_occ[order]
 
                 for _id, total_leak, total_occ in zip(ids, leaks, total_occ):
                     parsed = self._safe_parse_id(_id)
@@ -198,10 +202,9 @@ class WaveDataset(IterableDataset):
                     # positional channels
                     key = (BOARD_H, BOARD_W)
                     if key not in grid_cache:
-                        xs = torch.linspace(0, 1, BOARD_W)
-                        ys = torch.linspace(0, 1, BOARD_H)
-                        grid_cache[key] = (xs.expand(BOARD_H, -1),
-                                           ys.unsqueeze(1).expand(-1, BOARD_W))
+                        xs = torch.linspace(0, 1, BOARD_W, dtype=torch.float32)
+                        ys = torch.linspace(0, 1, BOARD_H, dtype=torch.float32)
+                        grid_cache[key] = (xs.expand(BOARD_H, -1), ys.unsqueeze(1).expand(-1, BOARD_W))
                     gx, gy = grid_cache[key]
                     board[X_CH].copy_(gx)
                     board[Y_CH].copy_(gy)
@@ -326,6 +329,7 @@ class WaveModel(nn.Module):
             nn.Linear(8 + 8, 32),
             nn.GELU(),
             nn.Linear(32, 16),
+            nn.GELU(),
         )
 
         # shared trunk
@@ -352,6 +356,8 @@ class WaveModel(nn.Module):
         m = self.merc_proj(merc_ratio)                  # (N, 8)
 
         z_joint = self.joint(torch.cat([w, m], dim=1))
+        assert z_img.shape[1] + z_joint.shape[1] == self.shared[0].in_features, "cat dim mismatch - check embed sizes"
+
         feats   = self.shared(torch.cat([z_img, z_joint], dim=1))
         return self.out_head(feats)                     # raw logit (N, 1)
 
@@ -451,6 +457,7 @@ if __name__ == "__main__":
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32       = True
     torch.backends.cudnn.benchmark        = True
+    torch.autograd.set_detect_anomaly(True)
     try:
         train()
     except Exception:
