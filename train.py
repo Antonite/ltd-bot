@@ -143,10 +143,6 @@ class WaveDataset(IterableDataset):
                 ids          = batch.column("_id").to_pylist()
                 leaks        = batch.column("totalLeaked").to_numpy()
                 total_occ    = batch.column("totalOccurrences").to_numpy()
-                # order = rng.permutation(len(ids))
-                # ids        = [ids[i]        for i in order]
-                # leaks      = leaks[order]
-                # total_occ  = total_occ[order]
 
                 for _id, total_leak, total_occ in zip(ids, leaks, total_occ):
                     parsed = self._safe_parse_id(_id)

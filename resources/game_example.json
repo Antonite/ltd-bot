@@ -1,0 +1,1340 @@
+{
+  "_id": "0d178a19d62d7d1a92a4340ea2ce7419565c6aa8f9c970c72081af73e60da0d9",
+  "availablemode": null,
+  "date": "2024-12-15T00:00:00.000Z",
+  "endingWave": 12,
+  "gameElo": 1583,
+  "gameLength": 1060,
+  "humanCount": 4,
+  "incomenchill": false,
+  "kingSpell": "lightning_hammer_activator_ability_id",
+  "leftKingPercentHp": [
+    1,
+    1,
+    1,
+    0.625,
+    0.63,
+    0.645,
+    0.66,
+    0.69,
+    0.225,
+    0.14,
+    0.21,
+    0
+  ],
+  "playerCount": 4,
+  "playersData": [
+    {
+      "playerId": "EB137530101E9007",
+      "playerName": "WayneEmerson",
+      "playerSlot": 1,
+      "legion": "Redraw",
+      "workers": 14.1958475,
+      "value": 1815,
+      "cross": false,
+      "gameResult": "lost",
+      "classicElo": -1977,
+      "overallElo": 1659,
+      "eloChange": -16,
+      "fighters": "Lost Chieftain,Lost Chieftain,Wileshroom,Canopie,Lost Chieftain,Canopie",
+      "eco": false,
+      "mercenaries": "Snail,Brute,Snail,Robo,Robo,Snail,Imp,Imp,Robo,Lizard,Lizard,Snail,Snail,Snail,Fiend",
+      "stayedUntilEnd": true,
+      "chosenSpell": "Divine Blessing",
+      "chosenSpellLocation": "2.5|7.5",
+      "partySize": 1,
+      "firstWaveFighters": "Desert Pilgrim,Wileshroom",
+      "rolls": "looter_unit_id, harpy_unit_id, wileshroom_unit_id, desert_pilgrim_unit_id, antler_unit_id, shadow_dancer_unit_id",
+      "legionSpecificElo": 1087,
+      "partyMembers": [
+        "WayneEmerson"
+      ],
+      "partyMembersIds": [
+        "EB137530101E9007"
+      ],
+      "mvpScore": 842,
+      "netWorthPerWave": [
+        433,
+        532,
+        647,
+        799,
+        958,
+        1153,
+        1355,
+        1612,
+        1904,
+        2212,
+        2541,
+        2639
+      ],
+      "valuePerWave": [
+        230,
+        230,
+        325,
+        420,
+        420,
+        600,
+        600,
+        780,
+        1035,
+        1305,
+        1560,
+        1815
+      ],
+      "workersPerWave": [
+        3,
+        4,
+        4,
+        6,
+        7,
+        9,
+        11,
+        11,
+        11,
+        11,
+        13.052533,
+        14.1958475
+      ],
+      "incomePerWave": [
+        10,
+        10,
+        25,
+        31,
+        51,
+        57,
+        82,
+        116,
+        146,
+        176,
+        176,
+        176
+      ],
+      "mercenariesSentPerWave": [
+        [
+          "Snail"
+        ],
+        [],
+        [],
+        [
+          "Brute",
+          "Snail"
+        ],
+        [],
+        [
+          "Robo",
+          "Robo",
+          "Snail"
+        ],
+        [],
+        [
+          "Imp",
+          "Robo"
+        ],
+        [
+          "Lizard",
+          "Lizard"
+        ],
+        [
+          "Snail",
+          "Snail",
+          "Snail"
+        ],
+        [
+          "Fiend"
+        ],
+        []
+      ],
+      "mercenariesReceivedPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Imp"
+        ],
+        [],
+        [
+          "Hermit"
+        ],
+        [],
+        [],
+        [
+          "Safety Mole",
+          "Brute"
+        ],
+        [
+          "Hermit"
+        ],
+        [],
+        [
+          "Pack Leader"
+        ]
+      ],
+      "leaksPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Flying Chicken",
+          "Flying Chicken",
+          "Imp"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Brute"
+        ],
+        [
+          "Granddaddy",
+          "Hermit"
+        ],
+        [],
+        [
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Pack Leader"
+        ]
+      ],
+      "buildPerWave": [
+        [
+          "wileshroom_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0"
+        ],
+        [
+          "wileshroom_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0"
+        ],
+        [
+          "wileshroom_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "wileshroom_unit_id:3.5|7:0"
+        ],
+        [
+          "wileshroom_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "wileshroom_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "wileshroom_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "wileshroom_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "wileshroom_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "wileshroom_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "desert_pilgrim_unit_id:6.5|5.5:0",
+          "canopie_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "lost_chieftain_unit_id:6.5|5.5:0",
+          "canopie_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "lost_chieftain_unit_id:6.5|5.5:0",
+          "canopie_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0",
+          "desert_pilgrim_unit_id:7.5|6:0",
+          "desert_pilgrim_unit_id:5.5|5:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "lost_chieftain_unit_id:6.5|5.5:0",
+          "canopie_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0",
+          "lost_chieftain_unit_id:7.5|6:0",
+          "desert_pilgrim_unit_id:5.5|5:0"
+        ],
+        [
+          "canopie_unit_id:2.5|7.5:0",
+          "lost_chieftain_unit_id:6.5|5.5:0",
+          "canopie_unit_id:3.5|7:0",
+          "wileshroom_unit_id:1.5|7:0",
+          "lost_chieftain_unit_id:7.5|6:0",
+          "lost_chieftain_unit_id:5.5|5:0"
+        ]
+      ],
+      "leakValue": 144,
+      "leaksCaughtValue": 35,
+      "leftAtSeconds": -1,
+      "kingUpgradesPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Attack",
+          "Upgrade King Attack"
+        ],
+        [],
+        []
+      ],
+      "opponentKingUpgradesPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "megamind": true,
+      "chosenChampionLocation": "-1|-1"
+    },
+    {
+      "playerId": "FFAB42919D2576AD",
+      "playerName": "FerrisWheelJunki",
+      "playerSlot": 2,
+      "legion": "Champion",
+      "workers": 12.091467,
+      "value": 1725,
+      "cross": false,
+      "gameResult": "lost",
+      "classicElo": -1677,
+      "overallElo": 1511,
+      "eloChange": -16,
+      "fighters": "Banana Bunk,Slime Larva,Honeyflower,Elite Archer,Sand Badger,Lost Chieftain,Slime Siren,Slime Larva,Slime Siren,Desert Pilgrim",
+      "eco": false,
+      "mercenaries": "Cannoneer",
+      "stayedUntilEnd": true,
+      "chosenSpell": "Magician",
+      "chosenSpellLocation": "4|6.5",
+      "partySize": 1,
+      "firstWaveFighters": "Desert Pilgrim",
+      "rolls": "angler_unit_id, honeyflower_unit_id, desert_pilgrim_unit_id, elite_archer_unit_id, sand_badger_unit_id, banana_bunk_unit_id",
+      "legionSpecificElo": 800,
+      "partyMembers": [
+        "FerrisWheelJunki"
+      ],
+      "partyMembersIds": [
+        "FFAB42919D2576AD"
+      ],
+      "mvpScore": -167,
+      "netWorthPerWave": [
+        428,
+        514,
+        628,
+        742,
+        910,
+        1102,
+        1300,
+        1534,
+        1760,
+        2046,
+        2388,
+        2507
+      ],
+      "valuePerWave": [
+        135,
+        185,
+        235,
+        285,
+        420,
+        545,
+        740,
+        885,
+        1015,
+        1190,
+        1445,
+        1725
+      ],
+      "workersPerWave": [
+        4,
+        5,
+        6,
+        6,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12.091467,
+        12.091467
+      ],
+      "incomePerWave": [
+        6,
+        12,
+        24,
+        36,
+        48,
+        66,
+        78,
+        96,
+        120,
+        150,
+        186,
+        186
+      ],
+      "mercenariesSentPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Cannoneer"
+        ],
+        []
+      ],
+      "mercenariesReceivedPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Brute",
+          "Snail"
+        ],
+        [
+          "Snail",
+          "Snail",
+          "Snail"
+        ],
+        [
+          "Lizard",
+          "Snail"
+        ],
+        [],
+        [],
+        [
+          "Ogre",
+          "Brute"
+        ],
+        [
+          "Brute",
+          "Lizard"
+        ],
+        [],
+        [
+          "Ogre",
+          "Brute"
+        ]
+      ],
+      "leaksPerWave": [
+        [],
+        [
+          "Wale",
+          "Wale",
+          "Wale",
+          "Wale",
+          "Wale"
+        ],
+        [],
+        [
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Flying Chicken",
+          "Brute"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Carapace",
+          "Ogre"
+        ],
+        [
+          "Granddaddy",
+          "Lizard"
+        ],
+        [],
+        [
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Ogre"
+        ]
+      ],
+      "buildPerWave": [
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_larva_unit_id:4|6.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_larva_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_larva_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_larva_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0",
+          "elite_archer_unit_id:4.5|5.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_larva_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0",
+          "elite_archer_unit_id:4.5|5.5:0",
+          "honeyflower_unit_id:5.5|7.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_siren_unit_id:5|6.5:0",
+          "desert_pilgrim_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0",
+          "elite_archer_unit_id:4.5|5.5:0",
+          "honeyflower_unit_id:5.5|7.5:0",
+          "slime_larva_unit_id:6|6.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_siren_unit_id:5|6.5:0",
+          "lost_chieftain_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0",
+          "elite_archer_unit_id:4.5|5.5:0",
+          "honeyflower_unit_id:5.5|7.5:0",
+          "slime_larva_unit_id:6|6.5:0"
+        ],
+        [
+          "desert_pilgrim_unit_id:3.5|7.5:0",
+          "slime_siren_unit_id:4|6.5:0",
+          "slime_larva_unit_id:3|6.5:0",
+          "slime_siren_unit_id:5|6.5:0",
+          "lost_chieftain_unit_id:4.5|7.5:0",
+          "sand_badger_unit_id:4|8.5:0",
+          "elite_archer_unit_id:4.5|5.5:0",
+          "honeyflower_unit_id:5.5|7.5:0",
+          "slime_larva_unit_id:6|6.5:0",
+          "banana_bunk_unit_id:3|8.5:0"
+        ]
+      ],
+      "leakValue": 249,
+      "leaksCaughtValue": 0,
+      "leftAtSeconds": -1,
+      "kingUpgradesPerWave": [
+        [
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Regen",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Attack"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Attack",
+          "Upgrade King Attack"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Regen",
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Attack"
+        ],
+        []
+      ],
+      "opponentKingUpgradesPerWave": [
+        [
+          "Upgrade King Attack"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "megamind": false,
+      "chosenChampionLocation": "4|6.5"
+    },
+    {
+      "playerId": "68622F78E6D4537B",
+      "playerName": "Gangaruno",
+      "playerSlot": 5,
+      "legion": "Cartel",
+      "workers": 16.170742,
+      "value": 1920,
+      "cross": false,
+      "gameResult": "won",
+      "classicElo": 1286,
+      "overallElo": 1577,
+      "eloChange": 16,
+      "fighters": "Warp Wing,Banana Bunk,Infiltrator,Deepcoiler,Violet,Warp Wing,Infiltrator,Sunfang,Howler,Deepcoiler,Warp Wing",
+      "eco": false,
+      "mercenaries": "Brute,Snail,Snail,Snail,Snail,Lizard,Snail,Ogre,Brute,Brute,Lizard,Ogre,Brute",
+      "stayedUntilEnd": true,
+      "chosenSpell": "Divine Blessing",
+      "chosenSpellLocation": "2.5|3.5",
+      "partySize": 1,
+      "firstWaveFighters": "Warp Wing",
+      "rolls": "howler_unit_id, infiltrator_unit_id, windhawk_unit_id, sea_serpent_unit_id, warp_wing_unit_id, banana_bunk_unit_id",
+      "legionSpecificElo": 1109,
+      "partyMembers": [
+        "Gangaruno"
+      ],
+      "partyMembersIds": [
+        "68622F78E6D4537B"
+      ],
+      "mvpScore": 3021,
+      "netWorthPerWave": [
+        442,
+        546,
+        666,
+        845,
+        1013,
+        1223,
+        1415,
+        1687,
+        2072,
+        2396,
+        2726,
+        2943
+      ],
+      "valuePerWave": [
+        145,
+        235,
+        270,
+        340,
+        424,
+        605,
+        750,
+        835,
+        1105,
+        1370,
+        1615,
+        1920
+      ],
+      "workersPerWave": [
+        4,
+        5,
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        15,
+        15,
+        16.170742
+      ],
+      "incomePerWave": [
+        15,
+        15,
+        30,
+        48,
+        60,
+        72,
+        72,
+        122,
+        149,
+        126,
+        176,
+        191
+      ],
+      "mercenariesSentPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Brute",
+          "Snail"
+        ],
+        [
+          "Snail",
+          "Snail",
+          "Snail"
+        ],
+        [
+          "Snail",
+          "Lizard"
+        ],
+        [],
+        [],
+        [
+          "Ogre",
+          "Brute"
+        ],
+        [
+          "Lizard",
+          "Brute"
+        ],
+        [],
+        [
+          "Ogre",
+          "Brute"
+        ]
+      ],
+      "mercenariesReceivedPerWave": [
+        [
+          "Snail"
+        ],
+        [],
+        [],
+        [
+          "Brute",
+          "Snail"
+        ],
+        [],
+        [
+          "Robo",
+          "Robo",
+          "Snail"
+        ],
+        [],
+        [
+          "Imp",
+          "Robo"
+        ],
+        [
+          "Lizard",
+          "Lizard"
+        ],
+        [
+          "Snail",
+          "Snail",
+          "Snail"
+        ],
+        [
+          "Fiend"
+        ],
+        []
+      ],
+      "leaksPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Flying Chicken",
+          "Brute"
+        ],
+        [],
+        [],
+        [],
+        [
+          "Kobra",
+          "Kobra",
+          "Kobra"
+        ],
+        [],
+        [],
+        [],
+        []
+      ],
+      "buildPerWave": [
+        [
+          "warp_wing_unit_id:0.5|5.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "sea_serpent_unit_id:2.5|13.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "sea_serpent_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "sea_serpent_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "sea_serpent_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:4"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0",
+          "windhawk_unit_id:7.5|4:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0",
+          "violet_unit_id:7.5|4:0",
+          "sea_serpent_unit_id:7.5|13.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "howler_unit_id:2.5|3.5:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0",
+          "violet_unit_id:7.5|4:0",
+          "deepcoiler_unit_id:7.5|13.5:0",
+          "infiltrator_unit_id:6.5|3.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "howler_unit_id:1.5|3:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0",
+          "violet_unit_id:7.5|4:0",
+          "deepcoiler_unit_id:7.5|13.5:0",
+          "infiltrator_unit_id:6.5|3.5:0",
+          "banana_bunk_unit_id:2.5|3.5:0"
+        ],
+        [
+          "warp_wing_unit_id:0.5|5.5:0",
+          "deepcoiler_unit_id:2.5|13.5:0",
+          "howler_unit_id:0.5|3.5:0",
+          "sunfang_unit_id:1.5|3:0",
+          "infiltrator_unit_id:1.5|4:0",
+          "warp_wing_unit_id:1.5|5:0",
+          "violet_unit_id:7.5|4:0",
+          "deepcoiler_unit_id:7.5|13.5:0",
+          "infiltrator_unit_id:6.5|3.5:0",
+          "banana_bunk_unit_id:2.5|3.5:0",
+          "warp_wing_unit_id:0.5|4.5:0"
+        ]
+      ],
+      "leakValue": 36,
+      "leaksCaughtValue": 42,
+      "leftAtSeconds": -1,
+      "kingUpgradesPerWave": [
+        [
+          "Upgrade King Attack"
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "opponentKingUpgradesPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Attack",
+          "Upgrade King Attack"
+        ],
+        [],
+        []
+      ],
+      "megamind": true,
+      "chosenChampionLocation": "-1|-1"
+    },
+    {
+      "playerId": "A1B97F18D34641CA",
+      "playerName": "Koelie",
+      "playerSlot": 6,
+      "legion": "LockIn",
+      "workers": 13.6016,
+      "value": 1750,
+      "cross": false,
+      "gameResult": "won",
+      "classicElo": -2082,
+      "overallElo": 1585,
+      "eloChange": 16,
+      "fighters": "Gatling Gun,Pollywog,Pollywog,Royal Guard,Cage Of Pain,Royal Guard,Seraphin,Seraphin,Seraphin,Seraphin,Arctaire",
+      "eco": false,
+      "mercenaries": "Imp,Imp,Hermit,Safety Mole,Brute,Hermit,Pack Leader",
+      "stayedUntilEnd": true,
+      "chosenSpell": "Sorcerer",
+      "chosenSpellLocation": "8.5|9",
+      "partySize": 1,
+      "firstWaveFighters": "Yozora",
+      "rolls": "pollywog_unit_id, golden_buckler_unit_id, sacred_steed_unit_id, cursed_casket_unit_id, yozora_unit_id, gatling_gun_unit_id",
+      "legionSpecificElo": 800,
+      "partyMembers": [
+        "Koelie"
+      ],
+      "partyMembersIds": [
+        "A1B97F18D34641CA"
+      ],
+      "mvpScore": 1937,
+      "netWorthPerWave": [
+        426,
+        519,
+        613,
+        769,
+        906,
+        1069,
+        1238,
+        1452,
+        1793,
+        2115,
+        2405,
+        2574
+      ],
+      "valuePerWave": [
+        190,
+        220,
+        300,
+        410,
+        460,
+        595,
+        725,
+        825,
+        1040,
+        1385,
+        1560,
+        1750
+      ],
+      "workersPerWave": [
+        4,
+        4,
+        4,
+        6,
+        6,
+        6,
+        6,
+        8,
+        8,
+        8,
+        11.2536,
+        13.6016
+      ],
+      "incomePerWave": [
+        4,
+        4,
+        4,
+        29,
+        29,
+        49,
+        49,
+        79,
+        94,
+        114,
+        114,
+        154
+      ],
+      "mercenariesSentPerWave": [
+        [],
+        [],
+        [],
+        [
+          "Imp"
+        ],
+        [],
+        [
+          "Hermit"
+        ],
+        [],
+        [],
+        [
+          "Safety Mole",
+          "Brute"
+        ],
+        [
+          "Hermit"
+        ],
+        [],
+        [
+          "Pack Leader"
+        ]
+      ],
+      "mercenariesReceivedPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Cannoneer"
+        ],
+        []
+      ],
+      "leaksPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis",
+          "Mantis"
+        ]
+      ],
+      "buildPerWave": [
+        [
+          "yozora_unit_id:1.5|9.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "pollywog_unit_id:0.5|3.5:0",
+          "pollywog_unit_id:1.5|3.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "devilfish_unit_id:0.5|3.5:0",
+          "pollywog_unit_id:1.5|3.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "devilfish_unit_id:0.5|3.5:0",
+          "devilfish_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "devilfish_unit_id:0.5|3.5:0",
+          "devilfish_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "golden_buckler_unit_id:7.5|9.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "devilfish_unit_id:0.5|3.5:0",
+          "devilfish_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cursed_casket_unit_id:8.5|9:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cage_of_pain_unit_id:8.5|9:0"
+        ],
+        [
+          "yozora_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cage_of_pain_unit_id:8.5|9:0",
+          "royal_guard_unit_id:2.5|9:0",
+          "pollywog_unit_id:8.5|3.5:0",
+          "pollywog_unit_id:8.5|2.5:0"
+        ],
+        [
+          "arctaire_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "pollywog_unit_id:0.5|2.5:0",
+          "pollywog_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cage_of_pain_unit_id:8.5|9:0",
+          "royal_guard_unit_id:2.5|9:0",
+          "pollywog_unit_id:8.5|3.5:0"
+        ],
+        [
+          "arctaire_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "seraphin_unit_id:0.5|2.5:0",
+          "seraphin_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cage_of_pain_unit_id:8.5|9:0",
+          "royal_guard_unit_id:2.5|9:0",
+          "pollywog_unit_id:8.5|3.5:0",
+          "pollywog_unit_id:8.5|2.5:0"
+        ],
+        [
+          "arctaire_unit_id:1.5|9.5:0",
+          "seraphin_unit_id:0.5|3.5:0",
+          "seraphin_unit_id:1.5|3.5:0",
+          "seraphin_unit_id:0.5|2.5:0",
+          "seraphin_unit_id:1.5|2.5:0",
+          "royal_guard_unit_id:7.5|9.5:0",
+          "cage_of_pain_unit_id:8.5|9:0",
+          "royal_guard_unit_id:2.5|9:0",
+          "pollywog_unit_id:8.5|3.5:0",
+          "pollywog_unit_id:8.5|2.5:0",
+          "gatling_gun_unit_id:7.5|8.5:0"
+        ]
+      ],
+      "leakValue": 33,
+      "leaksCaughtValue": 59,
+      "leftAtSeconds": -1,
+      "kingUpgradesPerWave": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "opponentKingUpgradesPerWave": [
+        [
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Regen",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Attack"
+        ],
+        [
+          "Upgrade King Regen",
+          "Upgrade King Attack",
+          "Upgrade King Attack"
+        ],
+        [
+          "Upgrade King Spell",
+          "Upgrade King Regen",
+          "Upgrade King Regen",
+          "Upgrade King Regen"
+        ],
+        [
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Attack",
+          "Upgrade King Spell"
+        ],
+        [
+          "Upgrade King Attack"
+        ],
+        []
+      ],
+      "megamind": false,
+      "chosenChampionLocation": "-1|-1"
+    }
+  ],
+  "queueType": "Normal",
+  "rightKingPercentHp": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "spellChoices": [
+    "divine_blessing_powerup_id",
+    "magician_powerup_id",
+    "sorcerer_spell_damage_powerup_id"
+  ],
+  "version": "v11.11.hf1",
+  "votedmode": null
+}

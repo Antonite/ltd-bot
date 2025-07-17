@@ -1,109 +1,85 @@
 #!/usr/bin/env python3
 """
-mongo_to_shards.py
-
-Streams a MongoDB collection directly into sharded Parquet files in one pass
-(100 000-row batches, 64 shards, Snappy compression, RNG seed 42).
+shard_training_set_v3.py  -  write shards whose *first* row-group is already
+a random slice of the 50 M-row collection.
 """
 from __future__ import annotations
-
-import argparse
-import logging
-import os
-from typing import List, Optional, cast
-
-import numpy as np
-import pyarrow as pa
+import os, struct, tempfile, pickle, xxhash, pymongo, pyarrow as pa
 import pyarrow.parquet as pq
-import pymongo
 from tqdm import tqdm
+from typing import Dict, List, Tuple
 
+# ── parameters ──────────────────────────────────────────────────────────
+SEED       = 0x1234_5678_9ABC_DEF0        # change = new shuffle
+SHARDS     = 64
+ROW_GROUP  = 10_000                       # rows per row-group
+DST_DIR    = "shards"
 
-def parse_args() -> argparse.Namespace:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--mongo_uri", default="mongodb://localhost:27017")
-    ap.add_argument("--db", default="legiontd2")
-    ap.add_argument("--coll", default="waveBuildAggregation")
-    ap.add_argument("--dst_dir", default="shards")
-    ap.add_argument("--shards", type=int, default=64)
-    ap.add_argument("--batch", type=int, default=100_000)
-    ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--total", type=int, default=45_200_000,
-                    help="progress-bar total; omit to disable estimate")
-    return ap.parse_args()
+# ── helper: open writers lazily, return concrete type ───────────────────
+def get_writer(sid: int, schema: pa.Schema,
+               writers: Dict[int, pq.ParquetWriter]) -> pq.ParquetWriter:
+    w = writers.get(sid)
+    if w is None:
+        path = os.path.join(DST_DIR, f"{sid:03}.parquet")
+        w = pq.ParquetWriter(path, schema,
+                             compression="snappy", use_dictionary=True)
+        writers[sid] = w
+    return w
 
+# ── 1️⃣  stream collection, assign a 64-bit random key, keep on disk ──
+tmp = tempfile.NamedTemporaryFile(delete=False).name
+with open(tmp, "wb") as fh, \
+     pymongo.MongoClient("mongodb://localhost:27017", connect=False) as cli:
 
-def open_writers(n: int) -> List[Optional[pq.ParquetWriter]]:
-    return [None] * n
+    cur = cli.legiontd2.waveBuildAggregation.find(
+        {}, {"_id":1,"totalLeaked":1,"totalOccurrences":1},
+        batch_size=4096, no_cursor_timeout=True)
 
+    for doc in tqdm(cur, desc="hash-writing"):
+        key  = xxhash.xxh64(doc["_id"], seed=SEED).intdigest()
+        blob = pickle.dumps(doc, protocol=-1)
+        fh.write(struct.pack("<Q", key))
+        fh.write(struct.pack("<I", len(blob)))
+        fh.write(blob)
+    cur.close()
 
-def write_batch(tbl: pa.Table, rng: np.random.Generator,
-                writers: List[Optional[pq.ParquetWriter]], dst: str) -> None:
-    order     = rng.permutation(tbl.num_rows)
-    shard_ids = rng.integers(0, len(writers), len(order))
+# ── 2️⃣  load, sort by key, flush round-robin into shards ───────────────
+def iter_pairs(path: str):
+    with open(path, "rb") as f:
+        while hdr := f.read(12):
+            key, n = struct.unpack("<QI", hdr)
+            yield key, pickle.loads(f.read(n))
 
-    for sid in range(len(writers)):
-        mask = shard_ids == sid
-        if not mask.any():
-            continue
+pairs: List[Tuple[int, dict]] = list(iter_pairs(tmp))
+os.unlink(tmp)                         # remove temp file
+pairs.sort(key=lambda t: t[0])         # in-place 64-bit sort
 
-        writer = writers[sid]
-        if writer is None:                       # first time for this shard
-            path = os.path.join(dst, f"{sid:03}.parquet")
-            writer = pq.ParquetWriter(path, tbl.schema,
-                                      compression="snappy",
-                                      use_dictionary=True)
-            writers[sid] = writer
+writers: Dict[int, pq.ParquetWriter] = {}
+buffers: List[List[dict]] = [[] for _ in range(SHARDS)]
 
-        # Narrow Optional → ParquetWriter for static checkers
-        assert writer is not None
-        writer.write_table(tbl.take(pa.array(order[mask])))
+for _, doc in tqdm(pairs, desc="writing shards"):
+    sid = doc["_id"].__hash__() % SHARDS         # deterministic, cheap
+    buf = buffers[sid]
+    buf.append(doc)
 
+    if len(buf) >= ROW_GROUP:
+        tbl = pa.Table.from_pydict({
+            "_id":              [d["_id"]              for d in buf],
+            "totalLeaked":      [d["totalLeaked"]      for d in buf],
+            "totalOccurrences": [d["totalOccurrences"] for d in buf],
+        })
+        get_writer(sid, tbl.schema, writers).write_table(tbl)
+        buf.clear()
 
-def main() -> None:
-    args = parse_args()
-    os.makedirs(args.dst_dir, exist_ok=True)
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s %(levelname)s %(message)s")
+# final flush for partially filled buffers
+for sid, buf in enumerate(buffers):
+    if buf:
+        tbl = pa.Table.from_pydict({
+            "_id":              [d["_id"]              for d in buf],
+            "totalLeaked":      [d["totalLeaked"]      for d in buf],
+            "totalOccurrences": [d["totalOccurrences"] for d in buf],
+        })
+        get_writer(sid, tbl.schema, writers).write_table(tbl)
 
-    client = pymongo.MongoClient(args.mongo_uri, connect=False)
-    col    = client[args.db][args.coll]
-
-    cursor = col.find({}, {"_id": 1, "totalLeaked": 1, "totalOccurrences": 1},
-                      sort=[("_id", 1)], batch_size=4096, no_cursor_timeout=True)
-
-    writers = open_writers(args.shards)
-    rng     = np.random.default_rng(args.seed)
-    batch: list[dict] = []
-
-    progress = tqdm(cursor, total=args.total, disable=args.total is None, smoothing=0.2)
-    try:
-        for doc in progress:
-            batch.append(doc)
-            if len(batch) == args.batch:
-                tbl = pa.Table.from_pydict({
-                    "_id":              [d["_id"]              for d in batch],
-                    "totalLeaked":      [d["totalLeaked"]      for d in batch],
-                    "totalOccurrences": [d["totalOccurrences"] for d in batch],
-                })
-                write_batch(tbl, rng, writers, args.dst_dir)
-                batch.clear()
-
-        if batch:  # final partial chunk
-            tbl = pa.Table.from_pydict({
-                "_id":              [d["_id"]              for d in batch],
-                "totalLeaked":      [d["totalLeaked"]      for d in batch],
-                "totalOccurrences": [d["totalOccurrences"] for d in batch],
-            })
-            write_batch(tbl, rng, writers, args.dst_dir)
-    finally:
-        for sid, w in enumerate(writers):
-            if w is not None:
-                logging.info("Closing shard %03d", sid)
-                w.close()
-        cursor.close()
-        client.close()
-
-
-if __name__ == "__main__":
-    main()
+for w in writers.values():
+    w.close()
