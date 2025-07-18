@@ -55,6 +55,8 @@ from shared import (
     X_CH,
     Y_CH,
     NF,
+    _X_GRID,
+    _Y_GRID,
     spell_channel,
 )
 from coord_utils import half_tile_coord_to_index
@@ -134,9 +136,6 @@ class WaveDataset(IterableDataset):
             for d in cli["legiontd2"]["waves"].find({}, {"levelNum": 1, "totalReward": 1})
         }
 
-        # coordinate grids cached per resolution
-        grid_cache: dict[tuple[int, int], tuple[torch.Tensor, torch.Tensor]] = {}
-
         for shard_path in self.shard_paths:
             pq_file = pq.ParquetFile(shard_path)
             for batch in pq_file.iter_batches(batch_size=2048):
@@ -148,24 +147,25 @@ class WaveDataset(IterableDataset):
                     parsed = self._safe_parse_id(_id)
                     if not parsed:
                         print(f"failed to parse id: {_id}") # keep this print line always
-                        continue
+                        raise RuntimeError("bad data")
                     wave_num, merc_bounty, fighters_txt = parsed
 
                     base_reward = wave_val.get(wave_num, 0.0)
                     if base_reward <= 0.0:
                         print(f"negative reward: {base_reward} id: {_id}") # keep this print line always
-                        continue
+                        raise RuntimeError("bad data")
 
                     threat = base_reward + merc_bounty
                     if threat <= 0:
                         print(f"negative threat: {threat} id: {_id}") # keep this print line always
-                        continue
+                        raise RuntimeError("bad data")
+                    if total_occ <= 0:
+                        print(f"bad total_occ: {total_occ} id: {_id}") # keep this print line always
+                        raise RuntimeError("bad data")
                     frac = (total_leak / total_occ) / threat
                     if not (0.0 <= frac <= 1.0001):
                         print(f"bad fraction: {frac} id: {_id}") # keep this print line always
-                        continue
-                    if frac == 0.0 and rng.random() > 0.1:     # heavy down-sample
-                        continue
+                        raise RuntimeError("bad data")
 
                     board = torch.zeros((C_IN, BOARD_H, BOARD_W),
                                         dtype=torch.float32)
@@ -177,12 +177,12 @@ class WaveDataset(IterableDataset):
                             ch = IDX.get(uid)
                             if ch is None:
                                 print(f"ch is none: {uid}, fighters_txt: {fighters_txt}") # keep this print line always
-                                continue
+                                raise RuntimeError("bad data")
                             x = half_tile_coord_to_index(float(xs))
                             y = half_tile_coord_to_index(float(ys))
                             if not (0 <= x < BOARD_W-1 and 0 <= y < BOARD_H-1):
                                 print(f"bad board coords: {BOARD_W},{BOARD_H} fighters_txt: {fighters_txt}") # keep this print line always
-                                continue
+                                raise RuntimeError("bad data")
 
                             board[ch, y:y+2, x:x+2] = 1.0          # presence
 
@@ -195,15 +195,8 @@ class WaveDataset(IterableDataset):
                             if sch != -1:
                                 board[sch, y:y+2, x:x+2] = 1.0
 
-                    # positional channels
-                    key = (BOARD_H, BOARD_W)
-                    if key not in grid_cache:
-                        xs = torch.linspace(0, 1, BOARD_W, dtype=torch.float32)
-                        ys = torch.linspace(0, 1, BOARD_H, dtype=torch.float32)
-                        grid_cache[key] = (xs.expand(BOARD_H, -1), ys.unsqueeze(1).expand(-1, BOARD_W))
-                    gx, gy = grid_cache[key]
-                    board[X_CH].copy_(gx)
-                    board[Y_CH].copy_(gy)
+                    board[X_CH].copy_(_X_GRID)
+                    board[Y_CH].copy_(_Y_GRID)
 
                     # log-clipped merc bounty
                     log_ratio = math.log1p(
@@ -262,19 +255,28 @@ def _collate_wave_samples(batch):
     targets    = torch.stack([s.target     for s in batch]).unsqueeze(1)
     return boards, wave_ids, merc_feats, targets
 
-def get_val_loader(batch_size=BATCH):
-    ds = WaveDataset(VAL_SHARDS, epoch_seed=0)
-    return DataLoader(
-        ds,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=NUM_WORKERS,
-        pin_memory=True,
-        prefetch_factor=PREFETCH,
-        persistent_workers=True,
-        multiprocessing_context="spawn",
-        collate_fn=_collate_wave_samples,   # ← **new line**
-    )
+VAL_SAMPLES = 100_000
+def get_val_loader(batch_size: int = BATCH,
+                   max_samples: int = VAL_SAMPLES,
+                   seed: int = 123) -> DataLoader:
+    """
+    Stream at most `max_samples` rows from the val shards
+    (class-balanced, same weighted sampler as training).
+    """
+    base = WaveDataset(VAL_SHARDS, epoch_seed=seed)
+    ds   = OnTheFlyWeighted(base,
+                            pos_w=POS_W,
+                            neg_w=NEG_W,
+                            num_samples=max_samples,
+                            seed=seed)
+    return DataLoader(ds,
+                      batch_size=batch_size,
+                      shuffle=False,
+                      num_workers=NUM_WORKERS,
+                      pin_memory=True,
+                      prefetch_factor=PREFETCH,
+                      persistent_workers=True,
+                      multiprocessing_context="spawn")
 
 def get_loader(epoch_seed: int):
     base = WaveDataset(SHARDS, epoch_seed)
